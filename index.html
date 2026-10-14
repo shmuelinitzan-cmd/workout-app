@@ -49,6 +49,8 @@ nav button.on{color:var(--acc)}
 .prog i{display:block;height:100%;background:var(--acc)}
 .wname{font-size:32px;font-weight:700;margin:8px 0 4px;overflow-wrap:anywhere}
 .wgt{font-size:30px;color:var(--acc);font-weight:700;margin-bottom:16px}
+.reps{color:var(--text)}
+.err{background:#3a1a1c;color:var(--danger);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:17px}
 .timer{font-size:72px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;padding:16px 0}
 .timer.run{color:var(--warn)}
 .timer.idle{color:var(--dim)}
@@ -84,15 +86,29 @@ function num(v,def){
 }
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 
+// Whole number >= 1, or null when missing/invalid (old data has no rep fields).
+function cleanRep(v){
+  if(v===null||v===undefined||v==='')return null;
+  var n=Math.round(num(v,0));
+  return n>=1?n:null;
+}
 function cleanEx(e){
   return {id:String(e.id||uid()),name:String(e.name||'').slice(0,80),
-    weight:Math.max(0,num(e.weight,0)),sets:Math.max(1,Math.round(num(e.sets,3))),rest:Math.max(0,Math.round(num(e.rest,90)))};
+    weight:Math.max(0,num(e.weight,0)),sets:Math.max(1,Math.round(num(e.sets,3))),rest:Math.max(0,Math.round(num(e.rest,90))),
+    repMin:cleanRep(e.repMin),repMax:cleanRep(e.repMax)};
 }
 function cleanLog(r){
   return {ts:num(r.ts,Date.now()),workout:String(r.workout||''),
     items:(Array.isArray(r.items)?r.items:[]).map(function(i){
-      return {name:String(i.name||'').slice(0,80),weight:Math.max(0,num(i.weight,0)),sets:Math.max(0,Math.round(num(i.sets,0)))};
+      return {name:String(i.name||'').slice(0,80),weight:Math.max(0,num(i.weight,0)),sets:Math.max(0,Math.round(num(i.sets,0))),
+        repMin:cleanRep(i.repMin),repMax:cleanRep(i.repMax)};
     })};
+}
+function repsText(o){
+  var a=o.repMin,b=o.repMax;
+  if(!a&&!b)return '';
+  if(a&&b&&a!==b)return a+'-'+b+' חזרות';
+  return (a||b)+' חזרות';
 }
 // Returns a clean {plan,log} or null when the shape is wrong.
 function normalize(d){
@@ -227,7 +243,7 @@ function viewWorkout(){
     '<button class="sq dng" data-act="exit" aria-label="יציאה">&#10005;</button></div>'+
     '<div class="prog"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
     '<div class="wname">'+esc(ex.name)+'</div>'+
-    '<div class="wgt">'+fmtW(ex.weight)+' ק״ג</div>'+
+    '<div class="wgt">'+fmtW(ex.weight)+' ק״ג'+(repsText(ex)?' <span class="reps">· '+repsText(ex)+'</span>':'')+'</div>'+
     '<div class="card"><div class="row between"><div class="setc">'+
       (complete?'הושלמו '+ex.sets+' מתוך '+ex.sets+' ✓':'סט '+(done+1)+' מתוך '+ex.sets)+'</div>'+
       '<div class="row"><button class="sq" data-act="setdn" aria-label="הפחת סט">&minus;</button>'+
@@ -257,7 +273,7 @@ function viewSummary(){
     return h;
   }
   sm.items.forEach(function(it,i){
-    h+='<div class="card"><h2>'+esc(it.name)+'</h2><div class="row">'+
+    h+='<div class="card"><h2>'+esc(it.name)+'</h2>'+(repsText(it)?'<div class="dim small" style="margin-bottom:8px">יעד: '+repsText(it)+'</div>':'')+'<div class="row">'+
       '<div class="field"><label>משקל (ק״ג)</label><input id="sw'+i+'" inputmode="decimal" value="'+fmtW(it.weight)+'"></div>'+
       '<div class="field"><label>סטים</label><input id="ss'+i+'" inputmode="numeric" value="'+it.sets+'"></div></div></div>';
   });
@@ -285,7 +301,7 @@ function viewLogDetail(){
   var h='<div class="row"><button class="sq" data-act="logback" aria-label="חזרה">&rarr;</button><h1 style="margin:0">'+esc(r.workout)+'</h1></div>'+
     '<p class="dim" style="margin-top:12px">'+esc(fmtDate(r.ts))+'</p>';
   r.items.forEach(function(it,i){
-    h+='<div class="card"><h2>'+esc(it.name)+'</h2><div class="row">'+
+    h+='<div class="card"><h2>'+esc(it.name)+'</h2>'+(repsText(it)?'<div class="dim small" style="margin-bottom:8px">יעד: '+repsText(it)+'</div>':'')+'<div class="row">'+
       '<div class="field"><label>משקל (ק״ג)</label><input id="lw'+i+'" inputmode="decimal" value="'+fmtW(it.weight)+'"></div>'+
       '<div class="field"><label>סטים</label><input id="ls'+i+'" inputmode="numeric" value="'+it.sets+'"></div></div></div>';
   });
@@ -312,10 +328,13 @@ function viewEdit(){
     '<div class="row"><div class="field"><label for="fw">משקל (ק״ג)</label><input id="fw" inputmode="decimal" value="'+(ed?fmtW(ed.weight):'')+'"></div>'+
     '<div class="field"><label for="fs">סטים</label><input id="fs" inputmode="numeric" value="'+(ed?ed.sets:3)+'"></div>'+
     '<div class="field"><label for="fr">מנוחה (שנ׳)</label><input id="fr" inputmode="numeric" value="'+(ed?ed.rest:90)+'"></div></div>'+
+    '<div class="row" style="margin-top:12px"><div class="field"><label for="fmin">חזרות מינימום</label><input id="fmin" inputmode="numeric" value="'+(ed&&ed.repMin?ed.repMin:'')+'"></div>'+
+    '<div class="field"><label for="fmax">חזרות מקסימום</label><input id="fmax" inputmode="numeric" value="'+(ed&&ed.repMax?ed.repMax:'')+'"></div></div>'+
+    '<div id="ferr" class="err" hidden></div>'+
     '<button class="pri big" data-act="saveex" style="margin-top:12px">'+(ed?'שמור':'הוסף')+'</button>'+
     (ed?'<button class="big" data-act="canceledit" style="margin-top:12px">ביטול</button>':'')+'</div>';
   w.exercises.forEach(function(e,i){
-    h+='<div class="card"><h2>'+esc(e.name)+'</h2><div class="dim small">'+fmtW(e.weight)+' ק״ג · '+e.sets+' סטים · מנוחה '+e.rest+' שנ׳</div>'+
+    h+='<div class="card"><h2>'+esc(e.name)+'</h2><div class="dim small">'+fmtW(e.weight)+' ק״ג · '+e.sets+' סטים'+(repsText(e)?' · '+repsText(e):'')+' · מנוחה '+e.rest+' שנ׳</div>'+
       '<div class="row" style="margin-top:12px"><button class="sq" data-act="exup" data-id="'+e.id+'" '+(i===0?'disabled':'')+' aria-label="למעלה">&uarr;</button>'+
       '<button class="sq" data-act="exdn" data-id="'+e.id+'" '+(i===w.exercises.length-1?'disabled':'')+' aria-label="למטה">&darr;</button>'+
       '<button class="grow" data-act="exedit" data-id="'+e.id+'">עריכה</button>'+
@@ -386,7 +405,7 @@ function buildSummary(){
   var s=S.session,w=S.plan[s.w],items=[];
   w.exercises.forEach(function(e){
     var d=s.done[e.id]||0;
-    if(d>0)items.push({id:e.id,name:e.name,weight:e.weight,sets:d});
+    if(d>0)items.push({id:e.id,name:e.name,weight:e.weight,sets:d,repMin:e.repMin,repMax:e.repMax});
   });
   ui.summary={workout:w.name,items:items,start:s.start};
 }
@@ -456,7 +475,7 @@ var A={
     var sm=ui.summary,upd=$('upd').checked,s=S.session,items=[];
     sm.items.forEach(function(it,i){
       var w=Math.max(0,num($('sw'+i).value,it.weight)),n=Math.max(0,Math.round(num($('ss'+i).value,it.sets)));
-      if(n>0)items.push({name:it.name,weight:w,sets:n,id:it.id});
+      if(n>0)items.push({name:it.name,weight:w,sets:n,id:it.id,repMin:it.repMin,repMax:it.repMax});
     });
     if(!items.length){alert('אין תרגילים לשמירה.');return;}
     if(upd){
@@ -465,7 +484,7 @@ var A={
         pl.exercises.forEach(function(e){if(e.id===it.id)e.weight=it.weight;});
       });
     }
-    S.log.push({ts:Date.now(),workout:sm.workout,items:items.map(function(it){return {name:it.name,weight:it.weight,sets:it.sets};})});
+    S.log.push({ts:Date.now(),workout:sm.workout,items:items.map(function(it){return {name:it.name,weight:it.weight,sets:it.sets,repMin:it.repMin||null,repMax:it.repMax||null};})});
     leaveSession();
   },
   logopen:function(el){ui.logIdx=+el.dataset.i;ui.screen='logd';render();},
@@ -486,7 +505,12 @@ var A={
   saveex:function(){
     var name=$('fn').value.trim();
     if(!name){$('fn').focus();return;}
-    var w=S.plan[ui.wi],data=cleanEx({id:ui.editId||uid(),name:name,weight:$('fw').value,sets:$('fs').value,rest:$('fr').value});
+    var rmin=cleanRep($('fmin').value),rmax=cleanRep($('fmax').value),err=$('ferr');
+    if(rmin&&rmax&&rmin>rmax){
+      err.textContent='חזרות מינימום לא יכולות להיות גדולות מהמקסימום.';err.hidden=false;
+      $('fmin').focus();return;
+    }
+    var w=S.plan[ui.wi],data=cleanEx({id:ui.editId||uid(),name:name,weight:$('fw').value,sets:$('fs').value,rest:$('fr').value,repMin:rmin,repMax:rmax});
     if(ui.editId){
       w.exercises=w.exercises.map(function(e){return e.id===ui.editId?data:e;});
     }else w.exercises.push(data);
