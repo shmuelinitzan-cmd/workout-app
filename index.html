@@ -36,14 +36,15 @@ button:disabled{opacity:.4}
 .big{min-height:72px;font-size:26px;width:100%}
 .sq{width:56px;padding:0;flex:none}
 .play{width:64px;height:64px;border-radius:50%;padding:0;font-size:26px;flex:none;background:var(--acc);color:var(--accText)}
-input[type=text],input[type=number],input:not([type]){font:inherit;font-size:20px;color:var(--text);background:#0f0f13;border:2px solid #3a3a46;border-radius:12px;min-height:56px;padding:0 14px;width:100%}
+input[type=text],input[type=number],input[type=date],input:not([type]){font:inherit;font-size:20px;color:var(--text);background:#0f0f13;border:2px solid #3a3a46;border-radius:12px;min-height:56px;padding:0 14px;width:100%}
+input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;text-align:right;padding:0 8px;font-size:18px}
 input:focus{outline:none;border-color:var(--acc)}
 label{display:block;font-size:15px;color:var(--dim);margin-bottom:4px}
 .field{flex:1;min-width:0}
 .chk{display:flex;gap:12px;align-items:center;font-size:20px;color:var(--text);min-height:56px;margin:0}
 .chk input{width:28px;height:28px;flex:none;accent-color:var(--acc)}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#121216;border-top:1px solid #2a2a33;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-nav button{flex:1;background:none;border-radius:0;font-size:17px;color:var(--dim);min-height:64px;padding:0 4px}
+nav button{flex:1;background:none;border-radius:0;font-size:15px;color:var(--dim);min-height:64px;padding:0 4px}
 nav button.on{color:var(--accL)}
 .prog{height:8px;background:var(--card2);border-radius:4px;overflow:hidden;margin:8px 0 16px}
 .prog i{display:block;height:100%;background:var(--acc)}
@@ -61,6 +62,17 @@ nav button.on{color:var(--accL)}
 .sep{height:1px;background:#2a2a33;margin:12px 0}
 .warnbox{background:#2b2410;color:var(--warn);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:16px}
 .item{cursor:pointer}
+.chart{width:100%;height:auto;display:block;direction:ltr}
+.rng{display:flex;gap:6px;margin-bottom:12px}
+.rng button{flex:1;font-size:15px;padding:0 2px;line-height:1.15}
+.rng button.on{background:var(--acc);color:var(--accText)}
+.trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid #2a2a33}
+.trow:last-child{border-bottom:0}
+.trow .c1{flex:2;min-width:0}
+.trow .c2{flex:1;text-align:center;font-weight:700}
+.trow .c3{flex:1;text-align:left;direction:ltr;color:var(--dim)}
+.up{color:var(--accL)!important}
+.dn{color:var(--warn)!important}
 </style>
 </head>
 <body>
@@ -78,7 +90,7 @@ var storageOK=true;
 var S;
 
 function blank(){
-  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],session:null};
+  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],session:null};
 }
 function num(v,def){
   var n=parseFloat(String(v).replace(',','.'));
@@ -104,6 +116,13 @@ function cleanLog(r){
         repMin:cleanRep(i.repMin),repMax:cleanRep(i.repMax)};
     })};
 }
+function cleanBody(r){
+  var kg=num(r&&r.kg,0),ts=num(r&&r.ts,0);
+  return kg>0&&ts>0?{ts:ts,kg:Math.round(kg*100)/100}:null;
+}
+function cleanBodyLog(a){
+  return (Array.isArray(a)?a:[]).map(cleanBody).filter(Boolean).sort(function(x,y){return x.ts-y.ts;});
+}
 function repsText(o){
   var a=o.repMin,b=o.repMax;
   if(!a&&!b)return '';
@@ -120,6 +139,7 @@ function normalize(d){
     out.plan[i].exercises=w.exercises.map(cleanEx);
   }
   out.log=d.log.map(cleanLog);
+  out.bodyLog=cleanBodyLog(d.bodyLog); // missing in older data/backups -> []
   return out;
 }
 function load(){
@@ -210,7 +230,7 @@ document.addEventListener('visibilitychange',function(){
 });
 
 /* ---------- ui state ---------- */
-var ui={screen:'home',wi:0,editId:null,logIdx:-1,alarm:false,summary:null};
+var ui={screen:'home',wi:0,editId:null,logIdx:-1,alarm:false,summary:null,pkind:'ex',pk:'',range:'h',bodyAll:false,bodyEdit:null};
 
 function curWorkout(){return S.plan[S.session?S.session.w:ui.wi];}
 
@@ -352,8 +372,178 @@ function viewBackup(){
     '<input type="file" id="file" accept="application/json,.json" hidden></div>';
 }
 
+/* ---------- progress ---------- */
+var MONTHS=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
+var RANGES=[['m','חודש',30],['q','3 חודשים',91],['h','חצי שנה',182],['y','שנה',365],['a','הכל',0]];
+var DAY=864e5;
+
+function exKey(n){return String(n).trim();}
+// Names that have at least one log record, most recently used first.
+function exerciseNames(){
+  var last=new Map();
+  S.log.forEach(function(r){r.items.forEach(function(it){
+    var k=exKey(it.name);
+    if(k&&(!last.has(k)||r.ts>last.get(k)))last.set(k,r.ts);
+  });});
+  return Array.from(last.keys()).sort(function(a,b){return last.get(b)-last.get(a);});
+}
+// Only records whose weight differs from the previous record of the same exercise.
+// The first record counts as the initial update.
+function exerciseUpdates(name){
+  var pts=[];
+  S.log.forEach(function(r){r.items.forEach(function(it){
+    if(exKey(it.name)===name)pts.push({ts:r.ts,v:it.weight});
+  });});
+  pts.sort(function(a,b){return a.ts-b.ts;});
+  var out=[],prev=null;
+  pts.forEach(function(p){if(prev===null||p.v!==prev)out.push(p);prev=p.v;});
+  return out;
+}
+function lastWeight(name){
+  var best=null;
+  S.log.forEach(function(r){r.items.forEach(function(it){
+    if(exKey(it.name)===name&&(!best||r.ts>=best.ts))best={ts:r.ts,v:it.weight};
+  });});
+  return best;
+}
+function fmtDay(ts){
+  return new Date(ts).toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+}
+function fmtDelta(d){
+  d=Math.round(d*100)/100;
+  return (d>0?'+':d<0?'-':'')+fmtW(Math.abs(d));
+}
+function ymd(ts){
+  var d=new Date(ts),p=function(n){return (n<10?'0':'')+n;};
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+}
+
+// pts: [{ts,v}] ascending. Hand-written SVG, real time axis, always LTR (old -> new).
+function chartSvg(pts){
+  var W=360,H=230,L=46,R=14,T=16,B=40,pw=W-L-R,ph=H-T-B;
+  var s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="גרף התקדמות">';
+  var txt=function(x,y,t,a,c){return '<text x="'+x+'" y="'+y+'" text-anchor="'+a+'" fill="'+(c||'#b4b4c0')+'" font-size="12">'+t+'</text>';};
+  if(pts.length<2){
+    var v=pts[0].v;
+    s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#2a2a33"/>'+
+      '<circle cx="'+(L+pw/2)+'" cy="'+(T+ph/2)+'" r="6" fill="#7f9bf5"/>'+
+      txt(L+pw/2,T+ph/2-14,fmtW(v),'middle','#fff');
+    return s+'</svg>';
+  }
+  var rg=RANGES.filter(function(r){return r[0]===ui.range;})[0]||RANGES[2];
+  var end=Math.max(Date.now(),pts[pts.length-1].ts);
+  var start=rg[2]?end-rg[2]*DAY:pts[0].ts;
+  if(end<=start)end=start+DAY;
+  var anchor=null,inside=[];
+  pts.forEach(function(p){if(p.ts<start)anchor=p;else inside.push(p);});
+  var ser=[];
+  if(anchor)ser.push({ts:start,v:anchor.v,dot:false});
+  inside.forEach(function(p){ser.push({ts:p.ts,v:p.v,dot:true});});
+  if(ser.length===1&&anchor)ser.push({ts:end,v:anchor.v,dot:false}); // flat line, no update in range
+  var vals=ser.map(function(p){return p.v;}),dmin=Math.min.apply(null,vals),dmax=Math.max.apply(null,vals);
+  var mn=dmin,mx=dmax;
+  if(mn===mx){mn-=1;mx+=1;}else{var pad=(mx-mn)*0.15;mn-=pad;mx+=pad;}
+  var X=function(ts){return L+(ts-start)/(end-start)*pw;};
+  var Y=function(v){return T+(1-(v-mn)/(mx-mn))*ph;};
+  // month grid
+  var months=(end-start)/(30.4*DAY),step=Math.max(1,Math.ceil(months/6)),lineStep=months<=12?1:step;
+  var d=new Date(start),cur=new Date(d.getFullYear(),d.getMonth()+1,1),i=0;
+  var crossYear=new Date(start).getFullYear()!==new Date(end).getFullYear();
+  var yearAt=[];
+  while(cur.getTime()<=end){
+    var x=X(cur.getTime()),m=cur.getMonth();
+    if(i%lineStep===0)s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+(T+ph)+'" stroke="#2a2a33"/>';
+    if(i%step===0){
+      s+=txt(x.toFixed(1),T+ph+16,MONTHS[m],'middle');
+      if(crossYear&&m===0){s+=txt(x.toFixed(1),T+ph+31,cur.getFullYear(),'middle','#fff');yearAt.push(x);}
+    }
+    cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);i++;
+  }
+  if(crossYear&&!yearAt.some(function(x){return x<L+44;})){
+    s+=txt(L,T+ph+31,new Date(start).getFullYear(),'start','#fff');
+  }
+  s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#3a3a46"/>';
+  s+=txt(L-6,Y(dmax)+4,fmtW(dmax),'end');
+  if(dmin!==dmax)s+=txt(L-6,Y(dmin)+4,fmtW(dmin),'end');
+  s+='<polyline fill="none" stroke="#7f9bf5" stroke-width="3" stroke-linejoin="round" points="'+
+    ser.map(function(p){return X(p.ts).toFixed(1)+','+Y(p.v).toFixed(1);}).join(' ')+'"/>';
+  ser.forEach(function(p){
+    if(p.dot)s+='<circle cx="'+X(p.ts).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="4.5" fill="#7f9bf5" stroke="#0b0b0d" stroke-width="1.5"/>';
+  });
+  return s+'</svg>';
+}
+function rangeBar(){
+  return '<div class="rng">'+RANGES.map(function(r){
+    return '<button data-act="range" data-r="'+r[0]+'" class="'+(r[0]===ui.range?'on':'')+'">'+r[1]+'</button>';
+  }).join('')+'</div>';
+}
+function chartBlock(pts){
+  if(!pts.length)return '<div class="card dim">אין עדיין נתונים.</div>';
+  if(pts.length<2)return '<div class="card">'+chartSvg(pts)+'<p class="dim" style="text-align:center;margin:8px 0 0">אין עדיין מספיק נתונים לגרף</p></div>';
+  return rangeBar()+'<div class="card">'+chartSvg(pts)+'</div>';
+}
+
+function viewProg(){
+  var h='<h1>התקדמות</h1>',bl=S.bodyLog,lb=bl.length?bl[bl.length-1]:null;
+  h+='<div class="card item" data-act="progbody"><div class="row between"><div class="grow"><h2 style="margin-bottom:2px">משקל גוף</h2>'+
+    '<div class="dim small">'+(lb?esc(fmtDay(lb.ts)):'אין שקילות')+'</div></div>'+
+    (lb?'<div class="wgt" style="margin:0">'+fmtW(lb.kg)+' ק״ג</div>':'')+'</div></div>';
+  var names=exerciseNames();
+  names.forEach(function(n){
+    var lw=lastWeight(n);
+    h+='<div class="card item" data-act="progex" data-k="'+esc(n)+'"><div class="row between"><div class="grow"><h2 style="margin-bottom:2px">'+esc(n)+'</h2>'+
+      '<div class="dim small">'+esc(fmtDay(lw.ts))+'</div></div><div class="wgt" style="margin:0">'+fmtW(lw.v)+' ק״ג</div></div></div>';
+  });
+  if(!names.length)h+='<div class="card dim">תרגילים יופיעו כאן אחרי שתשמור אימון ביומן.</div>';
+  return h;
+}
+
+function viewProgDetail(){
+  var h='<div class="row"><button class="sq" data-act="progback" aria-label="חזרה">&rarr;</button><h1 style="margin:0">'+
+    (ui.pkind==='body'?'משקל גוף':esc(ui.pk))+'</h1></div><div style="height:16px"></div>';
+  if(ui.pkind==='body'){
+    var bl=S.bodyLog,ed=ui.bodyEdit!=null?bl[ui.bodyEdit]:null;
+    h+='<div class="card"><h2>'+(ed?'עריכת שקילה':'הוסף שקילה')+'</h2><div class="row">'+
+      '<div class="field"><label for="bw">משקל (ק״ג)</label><input id="bw" inputmode="decimal" value="'+(ed?fmtW(ed.kg):'')+'"></div>'+
+      '<div class="field" style="flex:1.7"><label for="bd">תאריך</label><input id="bd" type="date" max="'+ymd(Date.now())+'" value="'+ymd(ed?ed.ts:Date.now())+'"></div></div>'+
+      '<div id="berr" class="err" hidden></div>'+
+      '<button class="pri big" data-act="bodysave" style="margin-top:12px">'+(ed?'שמור':'הוסף')+'</button>'+
+      (ed?'<button class="big" data-act="bodycancel" style="margin-top:12px">ביטול</button>':'')+'</div>';
+    var pts=bl.map(function(r){return {ts:r.ts,v:r.kg};});
+    h+=chartBlock(pts);
+    if(pts.length){
+      var idx=pts.map(function(_,i){return i;}).reverse();
+      var shown=ui.bodyAll?idx:idx.slice(0,5);
+      h+='<div class="card"><h2>'+(ui.bodyAll?'כל השקילות':'5 שקילות אחרונות')+'</h2>';
+      shown.forEach(function(i){
+        var dl=i===0?'התחלה':fmtDelta(pts[i].v-pts[i-1].v);
+        h+='<div style="border-bottom:1px solid #2a2a33;padding-bottom:12px;margin-bottom:12px"><div class="trow" style="border:0;padding-bottom:8px"><div class="c1">'+esc(fmtDay(pts[i].ts))+'</div>'+
+          '<div class="c2">'+fmtW(pts[i].v)+'</div><div class="c3 '+(dl[0]==='+'?'up':dl[0]==='-'?'dn':'')+'">'+dl+'</div></div>'+
+          '<div class="row"><button class="grow" data-act="bodyedit" data-i="'+i+'">עריכה</button>'+
+          '<button class="grow dng" data-act="bodydel" data-i="'+i+'">מחיקה</button></div></div>';
+      });
+      if(!ui.bodyAll&&pts.length>5)h+='<button class="big" data-act="bodyall">הצג הכל ('+pts.length+')</button>';
+      else if(ui.bodyAll&&pts.length>5)h+='<button class="big" data-act="bodyall">הצג 5 אחרונות</button>';
+      h+='</div>';
+    }
+    return h;
+  }
+  var ups=exerciseUpdates(ui.pk);
+  h+=chartBlock(ups);
+  if(ups.length){
+    h+='<div class="card"><h2>5 עדכוני משקל אחרונים</h2>';
+    ups.map(function(_,i){return i;}).reverse().slice(0,5).forEach(function(i){
+      var dl=i===0?'התחלה':fmtDelta(ups[i].v-ups[i-1].v);
+      h+='<div class="trow"><div class="c1">'+esc(fmtDay(ups[i].ts))+'</div><div class="c2">'+fmtW(ups[i].v)+'</div>'+
+        '<div class="c3 '+(dl[0]==='+'?'up':dl[0]==='-'?'dn':'')+'">'+dl+'</div></div>';
+    });
+    h+='</div>';
+  }
+  return h;
+}
+
 /* ---------- render ---------- */
-function render(){
+function render(keep){
   var sc=ui.screen,app=$('app'),nav=$('nav'),h;
   var focus=sc==='workout'||sc==='summary';
   if(sc==='home')h=viewHome();
@@ -361,19 +551,21 @@ function render(){
   else if(sc==='summary')h=viewSummary();
   else if(sc==='log')h=viewLog();
   else if(sc==='logd')h=viewLogDetail();
+  else if(sc==='prog')h=viewProg();
+  else if(sc==='progd')h=viewProgDetail();
   else if(sc==='plan')h=viewPlan();
   else if(sc==='edit')h=viewEdit();
   else h=viewBackup();
   app.innerHTML=h;
   app.className=focus?'noNav':'';
   nav.style.display=focus?'none':'flex';
-  var tab={home:'home',log:'log',logd:'log',plan:'plan',edit:'plan',backup:'backup'}[sc];
-  var tabs=[['home','אימון'],['log','יומן'],['plan','תוכנית'],['backup','גיבוי']];
+  var tab={home:'home',log:'log',logd:'log',prog:'prog',progd:'prog',plan:'plan',edit:'plan',backup:'backup'}[sc];
+  var tabs=[['home','אימון'],['log','יומן'],['prog','התקדמות'],['plan','תוכנית'],['backup','גיבוי']];
   nav.innerHTML=tabs.map(function(t){
     return '<button data-act="nav" data-s="'+t[0]+'" class="'+(t[0]===tab?'on':'')+'">'+t[1]+'</button>';
   }).join('');
   $('ov').innerHTML=ui.alarm?'<div class="ov"><div>המנוחה נגמרה!</div><button data-act="alarmoff">המשך</button></div>':'';
-  window.scrollTo(0,0);
+  if(keep!==true)window.scrollTo(0,0);
 }
 
 /* ---------- timer ---------- */
@@ -527,6 +719,33 @@ var A={
   },
   exup:function(el){moveEx(el.dataset.id,-1);},
   exdn:function(el){moveEx(el.dataset.id,1);},
+  progbody:function(){ui.pkind='body';ui.bodyEdit=null;ui.bodyAll=false;ui.screen='progd';render();},
+  progex:function(el){ui.pkind='ex';ui.pk=el.dataset.k;ui.screen='progd';render();},
+  progback:function(){ui.screen='prog';render();},
+  range:function(el){ui.range=el.dataset.r;render(true);},
+  bodyall:function(){ui.bodyAll=!ui.bodyAll;render(true);},
+  bodyedit:function(el){ui.bodyEdit=+el.dataset.i;render();},
+  bodycancel:function(){ui.bodyEdit=null;render(true);},
+  bodydel:function(el){
+    if(!confirm('למחוק את השקילה?'))return;
+    S.bodyLog.splice(+el.dataset.i,1);ui.bodyEdit=null;save();render(true);
+  },
+  bodysave:function(){
+    var err=$('berr'),kg=num($('bw').value,0),v=$('bd').value,m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    var fail=function(t){err.textContent=t;err.hidden=false;};
+    if(!(kg>0)||kg>500)return fail('יש להזין משקל גדול מאפס.');
+    if(!m)return fail('יש לבחור תאריך.');
+    if(v>ymd(Date.now()))return fail('לא ניתן לבחור תאריך עתידי.');
+    var old=ui.bodyEdit!=null?S.bodyLog[ui.bodyEdit]:null,ts;
+    if(old&&ymd(old.ts)===v)ts=old.ts;
+    else if(v===ymd(Date.now()))ts=Date.now();
+    else ts=new Date(+m[1],+m[2]-1,+m[3],12).getTime();
+    var rec={ts:ts,kg:Math.round(kg*100)/100};
+    if(old)S.bodyLog.splice(ui.bodyEdit,1);
+    S.bodyLog.push(rec);
+    S.bodyLog.sort(function(a,b){return a.ts-b.ts;});
+    ui.bodyEdit=null;save();render(true);
+  },
   export:function(){doExport();},
   import:function(){$('file').click();}
 };
@@ -547,7 +766,7 @@ document.addEventListener('click',function(ev){
 function doExport(){
   var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
   var name='workout-backup-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json';
-  var text=JSON.stringify({app:'workout-app',version:1,exported:d.toISOString(),plan:S.plan,log:S.log},null,2);
+  var text=JSON.stringify({app:'workout-app',version:1,exported:d.toISOString(),plan:S.plan,log:S.log,bodyLog:S.bodyLog},null,2);
   try{
     var file=new File([text],name,{type:'application/json'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
@@ -572,7 +791,7 @@ document.addEventListener('change',function(ev){
     try{n=normalize(JSON.parse(rd.result));}catch(e){}
     if(!n){alert('קובץ הגיבוי לא תקין.');return;}
     if(!confirm('להחליף את התוכנית והיומן הנוכחיים ('+n.log.length+' אימונים ביומן)?'))return;
-    S.plan=n.plan;S.log=n.log;S.session=null;save();
+    S.plan=n.plan;S.log=n.log;S.bodyLog=n.bodyLog;S.session=null;save();
     ui.screen='home';render();
   };
   rd.onerror=function(){alert('קריאת הקובץ נכשלה.');};
