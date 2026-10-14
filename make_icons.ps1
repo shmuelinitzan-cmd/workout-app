@@ -6,7 +6,7 @@ function New-Icon([int]$size, [string]$path) {
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = 'AntiAlias'
     $g.Clear([System.Drawing.ColorTranslator]::FromHtml('#0b0b0d'))
-    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#4ade80'))
+    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#4169E1'))
     $s = $size / 512.0
     function Add-Rect($x, $y, $w, $h, $r) {
         $p = New-Object System.Drawing.Drawing2D.GraphicsPath
