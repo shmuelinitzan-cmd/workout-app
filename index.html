@@ -38,6 +38,18 @@ button:disabled{opacity:.4}
 .dng{color:var(--danger);border-color:#5A2E2D}
 .big{min-height:72px;font-size:22px;width:100%}
 .sq{width:56px;padding:0;flex:none}
+.bt{font-size:15px;font-weight:500;min-height:52px;border-radius:12px;padding:0 12px;white-space:nowrap}
+.bt-pri{font-size:18px;font-weight:700;min-height:56px;width:100%}
+.bt-main{font-size:16px;font-weight:600;min-height:54px}
+.bt-sec{font-size:14px;font-weight:500;min-height:52px}
+.bt-ico{width:52px;padding:0;flex:none;min-height:52px}
+.bt-ico .ico{width:20px;height:20px}
+.bt-ico.s{width:44px;min-height:44px}
+.bt-sm{font-size:14px;font-weight:500;min-height:44px;border-radius:12px;padding:0 16px;white-space:nowrap}
+.bwf{gap:8px;align-items:flex-end}
+.bwf label{font-size:14px;white-space:nowrap}
+.row.bwf input{font-size:17px;min-height:48px;padding:0 8px}
+.bwf button{padding:0 12px;min-height:48px}
 .play{width:64px;height:64px;border-radius:50%;padding:0;flex:none;background:var(--acc);border-color:var(--acc);color:var(--accText)}
 .play:active{background:var(--acc);filter:brightness(.9)}
 .play .ico{width:26px;height:26px}
@@ -74,7 +86,7 @@ nav button.on{color:var(--acc)}
 .item{cursor:pointer}
 .chart{width:100%;height:auto;display:block;direction:ltr}
 .rng{display:flex;gap:6px;margin-bottom:14px}
-.rng button{flex:1;font-size:15px;padding:0 2px;line-height:1.15}
+.rng button{flex:1;font-size:14px;font-weight:500;min-height:40px;border-radius:10px;padding:0 2px;line-height:1.15;white-space:nowrap}
 .rng button.on{background:var(--acc);border-color:var(--acc);color:var(--accText)}
 .trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .trow:last-child{border-bottom:0}
@@ -294,30 +306,30 @@ function viewWorkout(){
   var ex=w.exercises[s.i],done=s.done[ex.id]||0,complete=done>=ex.sets;
   var running=!!s.tEnd,paused=!!s.tPause;
   var h='<div class="row between"><div class="small dim">תרגיל '+(s.i+1)+' מתוך '+n+'</div>'+
-    '<button class="sq dng" data-act="exit" aria-label="יציאה">'+ic('close')+'</button></div>'+
+    '<button class="bt-ico dng" data-act="exit" aria-label="יציאה">'+ic('close')+'</button></div>'+
     '<div class="prog"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
     '<div class="wname">'+esc(ex.name)+'</div>'+
     '<div class="wgt">'+fmtW(ex.weight)+' ק״ג'+(repsText(ex)?' <span class="reps">· '+repsText(ex)+'</span>':'')+'</div>'+
     '<div class="card"><div class="row between"><div class="setc">'+
       (complete?'הושלמו '+ex.sets+' מתוך '+ex.sets+' '+ic('check'):'סט '+(done+1)+' מתוך '+ex.sets)+'</div>'+
-      '<div class="row"><button class="sq" data-act="setdn" aria-label="הפחת סט">'+ic('minus')+'</button>'+
-      '<button class="sq" data-act="setup" aria-label="הוסף סט">'+ic('plus')+'</button></div></div></div>'+
+      '<div class="row"><button class="bt-ico" data-act="setdn" aria-label="הפחת סט">'+ic('minus')+'</button>'+
+      '<button class="bt-ico" data-act="setup" aria-label="הוסף סט">'+ic('plus')+'</button></div></div></div>'+
     '<div class="card"><div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="'+RING_R+'"/>'+
       '<circle class="ra" id="rarc" cx="60" cy="60" r="'+RING_R+'" stroke-dasharray="'+RING_C+'" stroke-dashoffset="'+ringOff(s)+'"/></svg>'+
       '<div class="timer '+(running||paused?'run':'idle')+'" id="timer">'+
       fmtT(running?(s.tEnd-Date.now())/1000:paused?s.tPause/1000:ex.rest)+'</div></div>'+
       '<div class="small dim" style="text-align:center;margin-bottom:12px">מנוחה '+ex.rest+' שנ׳</div>';
   if(running||paused){
-    h+='<div class="row"><button class="grow" data-act="tpause">'+(paused?'המשך':'עצור')+'</button>'+
-       '<button class="grow" data-act="tskip">דלג על טיימר</button></div>';
+    h+='<div class="row"><button class="bt bt-sec grow" data-act="tpause">'+(paused?'המשך':'עצור')+'</button>'+
+       '<button class="bt bt-sec grow" data-act="tskip">דלג על טיימר</button></div>';
   }
   h+='</div>'+
-    '<button class="pri big" data-act="setdone" '+(complete?'disabled':'')+'>סיימתי סט</button>'+
-    '<div class="row" style="margin-top:12px"><button class="grow '+(complete?'pri':'')+'" data-act="next" style="min-height:64px">'+
+    '<button class="bt bt-pri pri" data-act="setdone" '+(complete?'disabled':'')+'>סיימתי סט</button>'+
+    '<button class="bt bt-main '+(complete?'pri':'')+'" data-act="next" style="width:100%;margin-top:12px">'+
       (s.i===n-1?'סיים אימון':'הבא')+'</button>'+
-      '<button class="grow" data-act="skipex" style="min-height:64px">דלג על תרגיל</button></div>'+
-    '<div class="row" style="margin-top:12px"><button class="grow small" data-act="prev" '+(s.i===0?'disabled':'')+'>'+ic('chev')+' הקודם</button>'+
-      '<button class="grow small" data-act="finish">סיום אימון</button></div>';
+    '<div class="row" style="margin-top:32px"><button class="bt bt-sec grow" data-act="prev" '+(s.i===0?'disabled':'')+'>הקודם</button>'+
+      '<button class="bt bt-sec grow" data-act="skipex">דלג על תרגיל</button>'+
+      '<button class="bt bt-sec grow" data-act="finish">סיום אימון</button></div>';
   return h;
 }
 
@@ -535,16 +547,16 @@ function viewProg(){
 }
 
 function viewProgDetail(){
-  var h='<div class="row"><button class="sq" data-act="progback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+
+  var h='<div class="row"><button class="bt-ico s" data-act="progback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+
     (ui.pkind==='body'?'משקל גוף':esc(ui.pk))+'</h1></div><div style="height:16px"></div>';
   if(ui.pkind==='body'){
     var bl=S.bodyLog,ed=ui.bodyEdit!=null?bl[ui.bodyEdit]:null;
-    h+='<div class="card"><h2>'+(ed?'עריכת שקילה':'הוסף שקילה')+'</h2><div class="row">'+
+    h+='<div class="card"><h2>'+(ed?'עריכת שקילה':'הוסף שקילה')+'</h2><div class="row bwf">'+
       '<div class="field"><label for="bw">משקל (ק״ג)</label><input id="bw" inputmode="decimal" value="'+(ed?fmtW(ed.kg):'')+'"></div>'+
-      '<div class="field" style="flex:1.7"><label for="bd">תאריך</label><input id="bd" type="date" max="'+ymd(Date.now())+'" value="'+ymd(ed?ed.ts:Date.now())+'"></div></div>'+
+      '<div class="field" style="flex:1.7"><label for="bd">תאריך</label><input id="bd" type="date" max="'+ymd(Date.now())+'" value="'+ymd(ed?ed.ts:Date.now())+'"></div>'+
+      '<button class="bt-sm pri" data-act="bodysave" style="flex:none;align-self:flex-end">'+(ed?'שמור':'הוסף')+'</button></div>'+
       '<div id="berr" class="err" hidden></div>'+
-      '<button class="pri big" data-act="bodysave" style="margin-top:12px">'+(ed?'שמור':'הוסף')+'</button>'+
-      (ed?'<button class="big" data-act="bodycancel" style="margin-top:12px">ביטול</button>':'')+'</div>';
+      (ed?'<button class="bt-sm" data-act="bodycancel" style="margin-top:12px">ביטול</button>':'')+'</div>';
     var pts=bl.map(function(r){return {ts:r.ts,v:r.kg};});
     h+=chartBlock(pts);
     if(pts.length){
@@ -555,11 +567,11 @@ function viewProgDetail(){
         var dl=i===0?'התחלה':fmtDelta(pts[i].v-pts[i-1].v);
         h+='<div style="border-bottom:1px solid #26262B;padding-bottom:12px;margin-bottom:12px"><div class="trow" style="border:0;padding-bottom:8px"><div class="c1">'+esc(fmtDay(pts[i].ts))+'</div>'+
           '<div class="c2">'+fmtW(pts[i].v)+'</div><div class="c3 '+(dl[0]==='+'?'up':dl[0]==='-'?'dn':'')+'">'+dl+'</div></div>'+
-          '<div class="row"><button class="grow" data-act="bodyedit" data-i="'+i+'">עריכה</button>'+
-          '<button class="grow dng" data-act="bodydel" data-i="'+i+'">מחיקה</button></div></div>';
+          '<div class="row"><button class="bt-sm grow" data-act="bodyedit" data-i="'+i+'">עריכה</button>'+
+          '<button class="bt-sm grow dng" data-act="bodydel" data-i="'+i+'">מחיקה</button></div></div>';
       });
-      if(!ui.bodyAll&&pts.length>5)h+='<button class="big" data-act="bodyall">הצג הכל ('+pts.length+')</button>';
-      else if(ui.bodyAll&&pts.length>5)h+='<button class="big" data-act="bodyall">הצג 5 אחרונות</button>';
+      if(!ui.bodyAll&&pts.length>5)h+='<button class="bt-sm" data-act="bodyall">הצג הכל ('+pts.length+')</button>';
+      else if(ui.bodyAll&&pts.length>5)h+='<button class="bt-sm" data-act="bodyall">הצג 5 אחרונות</button>';
       h+='</div>';
     }
     return h;
