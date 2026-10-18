@@ -5,8 +5,8 @@ function New-Icon([int]$size, [string]$path) {
     $bmp = New-Object System.Drawing.Bitmap $size, $size
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = 'AntiAlias'
-    $g.Clear([System.Drawing.ColorTranslator]::FromHtml('#0b0b0d'))
-    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#4169E1'))
+    $g.Clear([System.Drawing.ColorTranslator]::FromHtml('#0D0D0F'))
+    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#FF7A1A'))
     $s = $size / 512.0
     function Add-Rect($x, $y, $w, $h, $r) {
         $p = New-Object System.Drawing.Drawing2D.GraphicsPath
@@ -27,4 +27,5 @@ $dir = $PSScriptRoot
 New-Icon 180 (Join-Path $dir 'apple-touch-icon.png')
 New-Icon 192 (Join-Path $dir 'icon-192.png')
 New-Icon 512 (Join-Path $dir 'icon-512.png')
+
 

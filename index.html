@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>אימונים</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0b0d">
+<meta name="theme-color" content="#0D0D0F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,67 +14,76 @@
 <link rel="icon" type="image/png" href="./icon-192.png">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0b0b0d;--card:#1a1a20;--card2:#2a2a33;--text:#fff;--dim:#b4b4c0;--acc:#4169E1;--accL:#7f9bf5;--accText:#fff;--danger:#ff6b6b;--warn:#fbbf24}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.35;overflow-x:hidden;touch-action:manipulation}
-#app{min-height:100vh;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 16px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 96px) calc(env(safe-area-inset-left) + 16px);max-width:640px;margin:0 auto}
-#app.noNav{padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
-h1{font-size:30px;margin:8px 0 16px;overflow-wrap:anywhere}
-h2{font-size:24px;margin:0 0 8px;overflow-wrap:anywhere}
+:root{--bg:#0D0D0F;--card:#1A1A1E;--line:#26262B;--line2:#3A3A42;--text:#F2F2F4;--dim:#8E8E96;--acc:#FF7A1A;--accText:#0D0D0F;--danger:#F0706B}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:18px;font-weight:500;line-height:1.4;overflow-x:hidden;touch-action:manipulation}
+#app{min-height:100vh;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 20px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 100px) calc(env(safe-area-inset-left) + 18px);max-width:640px;margin:0 auto}
+#app.noNav{padding-bottom:calc(env(safe-area-inset-bottom) + 28px)}
+h1{font-size:30px;font-weight:700;margin:8px 0 20px;overflow-wrap:anywhere}
+h2{font-size:22px;font-weight:700;margin:0 0 8px;overflow-wrap:anywhere}
 p{margin:0 0 12px}
 .dim{color:var(--dim)}
 .small{font-size:15px}
-.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;min-width:0}
 .row{display:flex;gap:12px;align-items:center;min-width:0}
 .row>*{min-width:0}
 .grow{flex:1}
 .between{justify-content:space-between}
-button,.btn{font:inherit;font-size:20px;font-weight:600;color:var(--text);background:var(--card2);border:0;border-radius:14px;min-height:56px;padding:0 18px;cursor:pointer;user-select:none;-webkit-user-select:none}
-button:active{filter:brightness(1.25)}
+.ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ico.fill{fill:currentColor}
+button,.btn{font:inherit;font-size:19px;font-weight:700;color:var(--text);background:transparent;border:1.5px solid var(--line2);border-radius:14px;min-height:56px;padding:0 18px;cursor:pointer;user-select:none;-webkit-user-select:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button:active{background:#232328}
 button:disabled{opacity:.4}
-.pri{background:var(--acc);color:var(--accText)}
-.dng{background:#3a1a1c;color:var(--danger)}
-.big{min-height:72px;font-size:26px;width:100%}
+.pri{background:var(--acc);border-color:var(--acc);color:var(--accText)}
+.pri:active{background:var(--acc);filter:brightness(.9)}
+.dng{color:var(--danger);border-color:#5A2E2D}
+.big{min-height:72px;font-size:22px;width:100%}
 .sq{width:56px;padding:0;flex:none}
-.play{width:64px;height:64px;border-radius:50%;padding:0;font-size:26px;flex:none;background:var(--acc);color:var(--accText)}
-input[type=text],input[type=number],input[type=date],input:not([type]){font:inherit;font-size:20px;color:var(--text);background:#0f0f13;border:2px solid #3a3a46;border-radius:12px;min-height:56px;padding:0 14px;width:100%}
+.play{width:64px;height:64px;border-radius:50%;padding:0;flex:none;background:var(--acc);border-color:var(--acc);color:var(--accText)}
+.play:active{background:var(--acc);filter:brightness(.9)}
+.play .ico{width:26px;height:26px}
+input[type=text],input[type=number],input[type=date],input:not([type]){font:inherit;font-size:20px;color:var(--text);background:var(--bg);border:1.5px solid var(--line2);border-radius:12px;min-height:56px;padding:0 14px;width:100%}
 input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;text-align:right;padding:0 8px;font-size:18px}
 input:focus{outline:none;border-color:var(--acc)}
 label{display:block;font-size:15px;color:var(--dim);margin-bottom:4px}
 .field{flex:1;min-width:0}
 .chk{display:flex;gap:12px;align-items:center;font-size:20px;color:var(--text);min-height:56px;margin:0}
 .chk input{width:28px;height:28px;flex:none;accent-color:var(--acc)}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#121216;border-top:1px solid #2a2a33;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-nav button{flex:1;background:none;border-radius:0;font-size:15px;color:var(--dim);min-height:64px;padding:0 4px}
-nav button.on{color:var(--accL)}
-.prog{height:8px;background:var(--card2);border-radius:4px;overflow:hidden;margin:8px 0 16px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+nav button{flex:1;flex-direction:column;gap:4px;background:none;border:0;border-radius:0;font-size:12px;font-weight:500;color:var(--dim);min-height:62px;padding:6px 2px}
+nav button .ico{width:24px;height:24px}
+nav button.on{color:var(--acc)}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:10px 0 20px}
 .prog i{display:block;height:100%;background:var(--acc)}
 .wname{font-size:32px;font-weight:700;margin:8px 0 4px;overflow-wrap:anywhere}
-.wgt{font-size:30px;color:var(--accL);font-weight:700;margin-bottom:16px}
+.wgt{font-size:28px;color:var(--acc);font-weight:700;margin-bottom:18px}
 .reps{color:var(--text)}
-.err{background:#3a1a1c;color:var(--danger);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:17px}
-.timer{font-size:72px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;padding:16px 0}
-.timer.run{color:var(--warn)}
+.err{background:#2A1718;border:1px solid #5A2E2D;color:var(--danger);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:17px}
+.ring{position:relative;width:min(196px,100%);aspect-ratio:1;margin:0 auto 6px}
+.ring svg{position:absolute;inset:0;width:100%;height:100%}
+.ring .rt{fill:none;stroke:var(--line);stroke-width:3}
+.ring .ra{fill:none;stroke:var(--acc);stroke-width:3;transform:rotate(-90deg);transform-origin:60px 60px}
+.timer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;font-variant-numeric:tabular-nums}
 .timer.idle{color:var(--dim)}
-.setc{font-size:26px;font-weight:600}
-.tag{display:inline-block;background:var(--card2);border-radius:8px;padding:2px 10px;font-size:15px;color:var(--dim)}
-.ov{position:fixed;inset:0;background:var(--acc);color:var(--accText);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:10;font-size:40px;font-weight:800;text-align:center;padding:24px}
-.ov button{background:#fff;color:var(--acc);width:80%}
-.sep{height:1px;background:#2a2a33;margin:12px 0}
-.warnbox{background:#2b2410;color:var(--warn);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:16px}
+.setc{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
+.setc .ico{color:var(--acc);width:22px;height:22px}
+.tag{display:inline-block;border:1px solid var(--line2);border-radius:8px;padding:2px 10px;font-size:15px;color:var(--dim)}
+.ov{position:fixed;inset:0;background:var(--acc);color:var(--accText);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:10;font-size:38px;font-weight:700;text-align:center;padding:24px}
+.ov button{background:var(--bg);border-color:var(--bg);color:var(--text);width:80%}
+.sep{height:1px;background:var(--line);margin:12px 0}
+.warnbox{background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
 .item{cursor:pointer}
 .chart{width:100%;height:auto;display:block;direction:ltr}
-.rng{display:flex;gap:6px;margin-bottom:12px}
+.rng{display:flex;gap:6px;margin-bottom:14px}
 .rng button{flex:1;font-size:15px;padding:0 2px;line-height:1.15}
-.rng button.on{background:var(--acc);color:var(--accText)}
-.trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid #2a2a33}
+.rng button.on{background:var(--acc);border-color:var(--acc);color:var(--accText)}
+.trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .trow:last-child{border-bottom:0}
 .trow .c1{flex:2;min-width:0}
 .trow .c2{flex:1;text-align:center;font-weight:700}
 .trow .c3{flex:1;text-align:left;direction:ltr;color:var(--dim)}
-.up{color:var(--accL)!important}
-.dn{color:var(--warn)!important}
-</style>
-</head>
+.up{color:var(--acc)!important}
+.dn{color:var(--text)!important}
+</style></head>
 <body>
 <div id="app"></div>
 <nav id="nav"></nav>
@@ -249,9 +258,34 @@ function viewHome(){
   S.plan.forEach(function(w,i){
     h+='<div class="card"><div class="row between"><div class="grow"><h2>'+esc(w.name)+'</h2>'+
       '<div class="dim">'+w.exercises.length+' תרגילים</div></div>'+
-      '<button class="play" aria-label="התחל '+esc(w.name)+'" data-act="start" data-i="'+i+'">&#9654;</button></div></div>';
+      '<button class="play" aria-label="התחל '+esc(w.name)+'" data-act="start" data-i="'+i+'">'+ic('play','fill')+'</button></div></div>';
   });
   return h;
+}
+
+/* ---------- icons (inline, line style) ---------- */
+var ICONS={
+  play:'<path d="M8 5.5v13l11-6.5z"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>',
+  up:'<path d="M6 15l6-6 6 6"/>',
+  down:'<path d="M6 9l6 6 6-6"/>',
+  minus:'<path d="M5 12h14"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  dumbbell:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  log:'<path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  list:'<path d="M9 6h12M9 12h12M9 18h12M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/>',
+  backup:'<path d="M7 18a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 9a4.5 4.5 0 0 1 .5 9M12 11v8M9 16l3 3 3-3"/>'
+};
+function ic(n,c){return '<svg class="ico'+(c?' '+c:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+ICONS[n]+'</svg>';}
+// Rest-timer ring (display only): arc shows the share of the rest time still left.
+var RING_R=54,RING_C=Math.round(2*Math.PI*RING_R*100)/100;
+function ringOff(s){
+  var left=s.tEnd?s.tEnd-Date.now():s.tPause||0,tot=(s.tTotal||0)*1000;
+  var f=tot>0?Math.max(0,Math.min(1,left/tot)):0;
+  return (RING_C*(1-f)).toFixed(2);
 }
 
 function viewWorkout(){
@@ -260,17 +294,19 @@ function viewWorkout(){
   var ex=w.exercises[s.i],done=s.done[ex.id]||0,complete=done>=ex.sets;
   var running=!!s.tEnd,paused=!!s.tPause;
   var h='<div class="row between"><div class="small dim">תרגיל '+(s.i+1)+' מתוך '+n+'</div>'+
-    '<button class="sq dng" data-act="exit" aria-label="יציאה">&#10005;</button></div>'+
+    '<button class="sq dng" data-act="exit" aria-label="יציאה">'+ic('close')+'</button></div>'+
     '<div class="prog"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
     '<div class="wname">'+esc(ex.name)+'</div>'+
     '<div class="wgt">'+fmtW(ex.weight)+' ק״ג'+(repsText(ex)?' <span class="reps">· '+repsText(ex)+'</span>':'')+'</div>'+
     '<div class="card"><div class="row between"><div class="setc">'+
-      (complete?'הושלמו '+ex.sets+' מתוך '+ex.sets+' ✓':'סט '+(done+1)+' מתוך '+ex.sets)+'</div>'+
-      '<div class="row"><button class="sq" data-act="setdn" aria-label="הפחת סט">&minus;</button>'+
-      '<button class="sq" data-act="setup" aria-label="הוסף סט">+</button></div></div></div>'+
-    '<div class="card"><div class="timer '+(running||paused?'run':'idle')+'" id="timer">'+
-      fmtT(running?(s.tEnd-Date.now())/1000:paused?s.tPause/1000:ex.rest)+'</div>'+
-      '<div class="small dim" style="text-align:center;margin-top:-8px;margin-bottom:8px">מנוחה '+ex.rest+' שנ׳</div>';
+      (complete?'הושלמו '+ex.sets+' מתוך '+ex.sets+' '+ic('check'):'סט '+(done+1)+' מתוך '+ex.sets)+'</div>'+
+      '<div class="row"><button class="sq" data-act="setdn" aria-label="הפחת סט">'+ic('minus')+'</button>'+
+      '<button class="sq" data-act="setup" aria-label="הוסף סט">'+ic('plus')+'</button></div></div></div>'+
+    '<div class="card"><div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="'+RING_R+'"/>'+
+      '<circle class="ra" id="rarc" cx="60" cy="60" r="'+RING_R+'" stroke-dasharray="'+RING_C+'" stroke-dashoffset="'+ringOff(s)+'"/></svg>'+
+      '<div class="timer '+(running||paused?'run':'idle')+'" id="timer">'+
+      fmtT(running?(s.tEnd-Date.now())/1000:paused?s.tPause/1000:ex.rest)+'</div></div>'+
+      '<div class="small dim" style="text-align:center;margin-bottom:12px">מנוחה '+ex.rest+' שנ׳</div>';
   if(running||paused){
     h+='<div class="row"><button class="grow" data-act="tpause">'+(paused?'המשך':'עצור')+'</button>'+
        '<button class="grow" data-act="tskip">דלג על טיימר</button></div>';
@@ -280,7 +316,7 @@ function viewWorkout(){
     '<div class="row" style="margin-top:12px"><button class="grow '+(complete?'pri':'')+'" data-act="next" style="min-height:64px">'+
       (s.i===n-1?'סיים אימון':'הבא')+'</button>'+
       '<button class="grow" data-act="skipex" style="min-height:64px">דלג על תרגיל</button></div>'+
-    '<div class="row" style="margin-top:12px"><button class="grow small" data-act="prev" '+(s.i===0?'disabled':'')+'>&rarr; הקודם</button>'+
+    '<div class="row" style="margin-top:12px"><button class="grow small" data-act="prev" '+(s.i===0?'disabled':'')+'>'+ic('chev')+' הקודם</button>'+
       '<button class="grow small" data-act="finish">סיום אימון</button></div>';
   return h;
 }
@@ -318,7 +354,7 @@ function viewLog(){
 function viewLogDetail(){
   var r=S.log[ui.logIdx];
   if(!r)return viewLog();
-  var h='<div class="row"><button class="sq" data-act="logback" aria-label="חזרה">&rarr;</button><h1 style="margin:0">'+esc(r.workout)+'</h1></div>'+
+  var h='<div class="row"><button class="sq" data-act="logback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+esc(r.workout)+'</h1></div>'+
     '<p class="dim" style="margin-top:12px">'+esc(fmtDate(r.ts))+'</p>';
   r.items.forEach(function(it,i){
     h+='<div class="card"><h2>'+esc(it.name)+'</h2>'+(repsText(it)?'<div class="dim small" style="margin-bottom:8px">יעד: '+repsText(it)+'</div>':'')+'<div class="row">'+
@@ -342,7 +378,7 @@ function viewPlan(){
 function viewEdit(){
   var w=S.plan[ui.wi],ed=null;
   w.exercises.forEach(function(e){if(e.id===ui.editId)ed=e;});
-  var h='<div class="row"><button class="sq" data-act="goplan" aria-label="חזרה">&rarr;</button><h1 style="margin:0">'+esc(w.name)+'</h1></div>';
+  var h='<div class="row"><button class="sq" data-act="goplan" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+esc(w.name)+'</h1></div>';
   h+='<div class="card" style="margin-top:16px"><h2>'+(ed?'עריכת תרגיל':'הוסף תרגיל')+'</h2>'+
     '<label for="fn">שם התרגיל</label><input id="fn" value="'+esc(ed?ed.name:'')+'" style="margin-bottom:12px">'+
     '<div class="row"><div class="field"><label for="fw">משקל (ק״ג)</label><input id="fw" inputmode="decimal" value="'+(ed?fmtW(ed.weight):'')+'"></div>'+
@@ -355,8 +391,8 @@ function viewEdit(){
     (ed?'<button class="big" data-act="canceledit" style="margin-top:12px">ביטול</button>':'')+'</div>';
   w.exercises.forEach(function(e,i){
     h+='<div class="card"><h2>'+esc(e.name)+'</h2><div class="dim small">'+fmtW(e.weight)+' ק״ג · '+e.sets+' סטים'+(repsText(e)?' · '+repsText(e):'')+' · מנוחה '+e.rest+' שנ׳</div>'+
-      '<div class="row" style="margin-top:12px"><button class="sq" data-act="exup" data-id="'+e.id+'" '+(i===0?'disabled':'')+' aria-label="למעלה">&uarr;</button>'+
-      '<button class="sq" data-act="exdn" data-id="'+e.id+'" '+(i===w.exercises.length-1?'disabled':'')+' aria-label="למטה">&darr;</button>'+
+      '<div class="row" style="margin-top:12px"><button class="sq" data-act="exup" data-id="'+e.id+'" '+(i===0?'disabled':'')+' aria-label="למעלה">'+ic('up')+'</button>'+
+      '<button class="sq" data-act="exdn" data-id="'+e.id+'" '+(i===w.exercises.length-1?'disabled':'')+' aria-label="למטה">'+ic('down')+'</button>'+
       '<button class="grow" data-act="exedit" data-id="'+e.id+'">עריכה</button>'+
       '<button class="grow dng" data-act="exdel" data-id="'+e.id+'">מחיקה</button></div></div>';
   });
@@ -422,12 +458,12 @@ function ymd(ts){
 function chartSvg(pts){
   var W=360,H=230,L=46,R=14,T=16,B=40,pw=W-L-R,ph=H-T-B;
   var s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="גרף התקדמות">';
-  var txt=function(x,y,t,a,c){return '<text x="'+x+'" y="'+y+'" text-anchor="'+a+'" fill="'+(c||'#b4b4c0')+'" font-size="12">'+t+'</text>';};
+  var txt=function(x,y,t,a,c){return '<text x="'+x+'" y="'+y+'" text-anchor="'+a+'" fill="'+(c||'#8E8E96')+'" font-size="12">'+t+'</text>';};
   if(pts.length<2){
     var v=pts[0].v;
-    s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#2a2a33"/>'+
-      '<circle cx="'+(L+pw/2)+'" cy="'+(T+ph/2)+'" r="6" fill="#7f9bf5"/>'+
-      txt(L+pw/2,T+ph/2-14,fmtW(v),'middle','#fff');
+    s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#26262B"/>'+
+      '<circle cx="'+(L+pw/2)+'" cy="'+(T+ph/2)+'" r="6" fill="#FF7A1A"/>'+
+      txt(L+pw/2,T+ph/2-14,fmtW(v),'middle','#F2F2F4');
     return s+'</svg>';
   }
   var rg=RANGES.filter(function(r){return r[0]===ui.range;})[0]||RANGES[2];
@@ -452,23 +488,23 @@ function chartSvg(pts){
   var yearAt=[];
   while(cur.getTime()<=end){
     var x=X(cur.getTime()),m=cur.getMonth();
-    if(i%lineStep===0)s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+(T+ph)+'" stroke="#2a2a33"/>';
+    if(i%lineStep===0)s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+(T+ph)+'" stroke="#26262B"/>';
     if(i%step===0){
       s+=txt(x.toFixed(1),T+ph+16,MONTHS[m],'middle');
-      if(crossYear&&m===0){s+=txt(x.toFixed(1),T+ph+31,cur.getFullYear(),'middle','#fff');yearAt.push(x);}
+      if(crossYear&&m===0){s+=txt(x.toFixed(1),T+ph+31,cur.getFullYear(),'middle','#F2F2F4');yearAt.push(x);}
     }
     cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);i++;
   }
   if(crossYear&&!yearAt.some(function(x){return x<L+44;})){
-    s+=txt(L,T+ph+31,new Date(start).getFullYear(),'start','#fff');
+    s+=txt(L,T+ph+31,new Date(start).getFullYear(),'start','#F2F2F4');
   }
-  s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#3a3a46"/>';
+  s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#3A3A42"/>';
   s+=txt(L-6,Y(dmax)+4,fmtW(dmax),'end');
   if(dmin!==dmax)s+=txt(L-6,Y(dmin)+4,fmtW(dmin),'end');
-  s+='<polyline fill="none" stroke="#7f9bf5" stroke-width="3" stroke-linejoin="round" points="'+
+  s+='<polyline fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linejoin="round" points="'+
     ser.map(function(p){return X(p.ts).toFixed(1)+','+Y(p.v).toFixed(1);}).join(' ')+'"/>';
   ser.forEach(function(p){
-    if(p.dot)s+='<circle cx="'+X(p.ts).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="4.5" fill="#7f9bf5" stroke="#0b0b0d" stroke-width="1.5"/>';
+    if(p.dot)s+='<circle cx="'+X(p.ts).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.5" fill="#FF7A1A" stroke="#0D0D0F" stroke-width="1.5"/>';
   });
   return s+'</svg>';
 }
@@ -499,7 +535,7 @@ function viewProg(){
 }
 
 function viewProgDetail(){
-  var h='<div class="row"><button class="sq" data-act="progback" aria-label="חזרה">&rarr;</button><h1 style="margin:0">'+
+  var h='<div class="row"><button class="sq" data-act="progback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+
     (ui.pkind==='body'?'משקל גוף':esc(ui.pk))+'</h1></div><div style="height:16px"></div>';
   if(ui.pkind==='body'){
     var bl=S.bodyLog,ed=ui.bodyEdit!=null?bl[ui.bodyEdit]:null;
@@ -517,7 +553,7 @@ function viewProgDetail(){
       h+='<div class="card"><h2>'+(ui.bodyAll?'כל השקילות':'5 שקילות אחרונות')+'</h2>';
       shown.forEach(function(i){
         var dl=i===0?'התחלה':fmtDelta(pts[i].v-pts[i-1].v);
-        h+='<div style="border-bottom:1px solid #2a2a33;padding-bottom:12px;margin-bottom:12px"><div class="trow" style="border:0;padding-bottom:8px"><div class="c1">'+esc(fmtDay(pts[i].ts))+'</div>'+
+        h+='<div style="border-bottom:1px solid #26262B;padding-bottom:12px;margin-bottom:12px"><div class="trow" style="border:0;padding-bottom:8px"><div class="c1">'+esc(fmtDay(pts[i].ts))+'</div>'+
           '<div class="c2">'+fmtW(pts[i].v)+'</div><div class="c3 '+(dl[0]==='+'?'up':dl[0]==='-'?'dn':'')+'">'+dl+'</div></div>'+
           '<div class="row"><button class="grow" data-act="bodyedit" data-i="'+i+'">עריכה</button>'+
           '<button class="grow dng" data-act="bodydel" data-i="'+i+'">מחיקה</button></div></div>';
@@ -560,9 +596,9 @@ function render(keep){
   app.className=focus?'noNav':'';
   nav.style.display=focus?'none':'flex';
   var tab={home:'home',log:'log',logd:'log',prog:'prog',progd:'prog',plan:'plan',edit:'plan',backup:'backup'}[sc];
-  var tabs=[['home','אימון'],['log','יומן'],['prog','התקדמות'],['plan','תוכנית'],['backup','גיבוי']];
+  var tabs=[['home','אימון','dumbbell'],['log','יומן','log'],['prog','התקדמות','trend'],['plan','תוכנית','list'],['backup','גיבוי','backup']];
   nav.innerHTML=tabs.map(function(t){
-    return '<button data-act="nav" data-s="'+t[0]+'" class="'+(t[0]===tab?'on':'')+'">'+t[1]+'</button>';
+    return '<button data-act="nav" data-s="'+t[0]+'" class="'+(t[0]===tab?'on':'')+'">'+ic(t[2])+'<span>'+t[1]+'</span></button>';
   }).join('');
   $('ov').innerHTML=ui.alarm?'<div class="ov"><div>המנוחה נגמרה!</div><button data-act="alarmoff">המשך</button></div>':'';
   if(keep!==true)window.scrollTo(0,0);
@@ -586,6 +622,7 @@ setInterval(function(){
     ui.alarm=true;beeps();render();
   }else{
     var t=$('timer');if(t)t.textContent=fmtT(left/1000);
+    var a=$('rarc');if(a)a.setAttribute('stroke-dashoffset',ringOff(s));
   }
 },250);
 
