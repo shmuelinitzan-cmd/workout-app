@@ -1,5 +1,5 @@
 // Bump CACHE_VERSION on every deploy so phones pick up the new files.
-var CACHE_VERSION = 'v7';
+var CACHE_VERSION = 'v8';
 var CACHE = 'workout-app-' + CACHE_VERSION;
 var FILES = [
   './',
@@ -7,7 +7,8 @@ var FILES = [
   './manifest.webmanifest',
   './apple-touch-icon.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './timerend.mp3'
 ];
 
 self.addEventListener('install', function (e) {

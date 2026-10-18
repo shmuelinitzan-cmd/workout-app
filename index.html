@@ -211,7 +211,25 @@ function unlockAudio(){
     if(actx.state!=='running')actx.resume();
     var b=actx.createBuffer(1,1,22050),src=actx.createBufferSource();
     src.buffer=b;src.connect(actx.destination);src.start(0);
+    loadEndSound();
   }catch(e){}
+}
+// timerend.mp3 is decoded once on the unlocked context; any failure falls back to oscBeeps().
+var endBuf=null,endLoading=false;
+function loadEndSound(){
+  if(!actx||endBuf||endLoading)return;
+  endLoading=true;
+  try{
+    fetch('./timerend.mp3').then(function(r){
+      if(!r.ok)throw new Error('http');
+      return r.arrayBuffer();
+    }).then(function(ab){
+      return new Promise(function(res,rej){
+        var p=actx.decodeAudioData(ab,res,rej);
+        if(p&&p.then)p.then(res,rej);
+      });
+    }).then(function(buf){endBuf=buf;endLoading=false;}).catch(function(){endLoading=false;});
+  }catch(e){endLoading=false;}
 }
 ['touchend','pointerdown','click'].forEach(function(ev){document.addEventListener(ev,unlockAudio,{passive:true});});
 
@@ -220,6 +238,17 @@ function beeps(){
     if(!actx)unlockAudio();
     if(!actx)return;
     if(actx.state!=='running')actx.resume();
+    if(endBuf){
+      var s=actx.createBufferSource();
+      s.buffer=endBuf;s.connect(actx.destination);s.start(0);
+      return;
+    }
+  }catch(e){}
+  oscBeeps();
+}
+function oscBeeps(){
+  try{
+    if(!actx)return;
     var t=actx.currentTime+0.05;
     [880,880,1175].forEach(function(f,k){
       var o=actx.createOscillator(),g=actx.createGain(),st=t+k*0.32;
