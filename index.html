@@ -111,7 +111,10 @@ var storageOK=true;
 var S;
 
 function blank(){
-  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],session:null};
+  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file'},session:null};
+}
+function cleanSettings(v){
+  return {endSound:(v&&v.endSound==='beep')?'beep':'file'};
 }
 function num(v,def){
   var n=parseFloat(String(v).replace(',','.'));
@@ -161,6 +164,7 @@ function normalize(d){
   }
   out.log=d.log.map(cleanLog);
   out.bodyLog=cleanBodyLog(d.bodyLog); // missing in older data/backups -> []
+  out.settings=d.settings?cleanSettings(d.settings):null; // null = not in this data
   return out;
 }
 function load(){
@@ -169,6 +173,7 @@ function load(){
     if(r){
       var d=JSON.parse(r),n=normalize(d);
       if(n){
+        n.settings=n.settings||cleanSettings(null);
         var s=d.session;
         if(s&&typeof s.w==='number'&&s.w>=0&&s.w<4&&s.done&&typeof s.done==='object'){
           n.session={w:s.w,i:Math.max(0,s.i|0),done:s.done,tEnd:s.tEnd||null,tPause:s.tPause||null,tTotal:s.tTotal||0,start:s.start||Date.now()};
@@ -217,7 +222,7 @@ function unlockAudio(){
 // timerend.mp3 is decoded once on the unlocked context; any failure falls back to oscBeeps().
 var endBuf=null,endLoading=false;
 function loadEndSound(){
-  if(!actx||endBuf||endLoading)return;
+  if(!actx||endBuf||endLoading||S.settings.endSound!=='file')return;
   endLoading=true;
   try{
     fetch('./timerend.mp3').then(function(r){
@@ -238,7 +243,7 @@ function beeps(){
     if(!actx)unlockAudio();
     if(!actx)return;
     if(actx.state!=='running')actx.resume();
-    if(endBuf){
+    if(S.settings.endSound==='file'&&endBuf){
       var s=actx.createBufferSource();
       s.buffer=endBuf;s.connect(actx.destination);s.start(0);
       return;
@@ -441,7 +446,12 @@ function viewEdit(){
 }
 
 function viewBackup(){
+  var snd=S.settings.endSound;
   return '<h1>גיבוי</h1>'+
+    '<div class="card"><h2>צליל סיום מנוחה</h2><div class="row">'+
+      '<div class="rng grow" style="margin:0"><button data-act="sndfile" class="'+(snd==='file'?'on':'')+'">צליל חדש</button>'+
+      '<button data-act="sndbeep" class="'+(snd==='beep'?'on':'')+'">צלצול קלאסי</button></div>'+
+      '<button class="bt-sm" data-act="sndtry" style="flex:none">נסה</button></div></div>'+
     '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
@@ -824,6 +834,9 @@ var A={
     S.bodyLog.sort(function(a,b){return a.ts-b.ts;});
     ui.bodyEdit=null;save();render(true);
   },
+  sndfile:function(){S.settings.endSound='file';save();loadEndSound();render(true);},
+  sndbeep:function(){S.settings.endSound='beep';save();render(true);},
+  sndtry:function(){unlockAudio();beeps();},
   export:function(){doExport();},
   import:function(){$('file').click();}
 };
@@ -844,7 +857,7 @@ document.addEventListener('click',function(ev){
 function doExport(){
   var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
   var name='workout-backup-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json';
-  var text=JSON.stringify({app:'workout-app',version:1,exported:d.toISOString(),plan:S.plan,log:S.log,bodyLog:S.bodyLog},null,2);
+  var text=JSON.stringify({app:'workout-app',version:1,exported:d.toISOString(),plan:S.plan,log:S.log,bodyLog:S.bodyLog,settings:S.settings},null,2);
   try{
     var file=new File([text],name,{type:'application/json'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
@@ -869,7 +882,7 @@ document.addEventListener('change',function(ev){
     try{n=normalize(JSON.parse(rd.result));}catch(e){}
     if(!n){alert('קובץ הגיבוי לא תקין.');return;}
     if(!confirm('להחליף את התוכנית והיומן הנוכחיים ('+n.log.length+' אימונים ביומן)?'))return;
-    S.plan=n.plan;S.log=n.log;S.bodyLog=n.bodyLog;S.session=null;save();
+    S.plan=n.plan;S.log=n.log;S.bodyLog=n.bodyLog;if(n.settings)S.settings=n.settings;S.session=null;save();
     ui.screen='home';render();
   };
   rd.onerror=function(){alert('קריאת הקובץ נכשלה.');};
