@@ -394,6 +394,20 @@ function armAlarm(sec){
     // iOS pauses other audio (Spotify) while it plays and lets it resume when it ends.
     var el=new Audio();el.setAttribute('playsinline','');el.preload='auto';
     el.addEventListener('ended',function(){if(bg===el){alarmPlayed=true;releaseAlarm();}});
+    el.addEventListener('loadedmetadata',function(){
+      try{if(bg===el&&isFinite(el.duration))navigator.mediaSession.setPositionState({duration:el.duration,playbackRate:1,position:0});}catch(e){}
+    });
+    // Pause from the lock-screen card = the user paused the timer. releaseAlarm() nulls bg right after its own
+    // pause(), and the 'pause' event fires later, so bg!==el filters that case out. A track that finished also
+    // fires 'pause' before 'ended', hence the el.ended check.
+    el.addEventListener('pause',function(){
+      if(bg!==el||el.ended)return;
+      var s=S.session;
+      if(!s||!s.tEnd)return;
+      s.tPause=Math.max(0,s.tEnd-Date.now());s.tEnd=null;
+      disarmAlarm();
+      save();render(true);
+    });
     bg=el;
     setSession('playback');
     var url=URL.createObjectURL(buildAlarmWav(sec));
@@ -412,15 +426,16 @@ function armAlarm(sec){
           artwork:[{src:'./icon-512.png',sizes:'512x512',type:'image/png'},{src:'./icon-192.png',sizes:'192x192',type:'image/png'}]
         });
         // The track length equals the rest time, so the lock screen shows a countdown / progress bar.
-        // Hide skip/seek controls so a stray tap cannot jump past the alarm.
-        ['seekbackward','seekforward','previoustrack','nexttrack','seekto'].forEach(function(a){try{ms.setActionHandler(a,null);}catch(e){}});
-        el.addEventListener('loadedmetadata',function(){
-          try{if(isFinite(el.duration))ms.setPositionState({duration:el.duration,playbackRate:1,position:0});}catch(e){}
-        });
       }
     }catch(e){}
   }catch(e){alarmArmed=false;}
 }
+// Hide skip/seek controls so a stray tap cannot jump past the alarm. Set once, not per rest.
+try{
+  if('mediaSession' in navigator)['seekbackward','seekforward','previoustrack','nexttrack','seekto'].forEach(function(a){
+    try{navigator.mediaSession.setActionHandler(a,null);}catch(e){}
+  });
+}catch(e){}
 
 /* ---------- wake lock ---------- */
 var wl=null;

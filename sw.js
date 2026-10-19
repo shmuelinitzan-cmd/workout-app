@@ -1,5 +1,5 @@
 // Bump CACHE_VERSION on every deploy so phones pick up the new files.
-var CACHE_VERSION = 'v16';
+var CACHE_VERSION = 'v17';
 var CACHE = 'workout-app-' + CACHE_VERSION;
 var FILES = [
   './',
