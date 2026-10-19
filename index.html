@@ -589,8 +589,9 @@ function viewBackup(){
       '<button data-act="cdoff" class="'+(cd?'':'on')+'">כבויה</button></div>'+
       '<button class="bt-sm" data-act="cdtry" style="flex:none">נסה</button></div>'+
     '<h2 style="margin-top:16px">מוזיקה ברקע (Spotify)</h2><div class="row">'+
-      '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת (הצליל גם במסך כבוי)</button>'+
-      '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה (הצליל רק כשהאפליקציה פתוחה)</button></div></div></div>'+
+      '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת</button>'+
+      '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה</button></div></div>'+
+      '<p class="dim small" style="margin:10px 0 0">'+(mx?'המוזיקה ממשיכה, אבל הצליל נשמע רק כשהאפליקציה פתוחה על המסך.':'המוזיקה נעצרת בזמן המנוחה, והצליל נשמע גם כשהמסך כבוי.')+'</p></div>'+
     '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
@@ -986,7 +987,14 @@ var A={
   mixoff:function(){S.settings.musicMix=false;save();render(true);},
   cdon:function(){S.settings.countdown=true;save();render(true);},
   cdoff:function(){S.settings.countdown=false;save();render(true);},
-  cdtry:function(){unlockAudio();S.settings.countdown=true;armAlarm(7);if(S.settings.musicMix===true)setTimeout(beeps,7000);},
+  cdtry:function(){
+    // Preview only: force the countdown on while the demo is built, then restore the saved setting.
+    unlockAudio();
+    var prev=S.settings.countdown;
+    S.settings.countdown=true;
+    try{armAlarm(7);}finally{S.settings.countdown=prev;}
+    if(S.settings.musicMix===true)setTimeout(beeps,7000);
+  },
   export:function(){doExport();},
   import:function(){$('file').click();}
 };
