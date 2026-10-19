@@ -213,8 +213,6 @@ function unlockAudio(){
     var AC=window.AudioContext||window.webkitAudioContext;
     if(!AC)return;
     if(!actx)actx=new AC();
-    // iOS 16.4+: 'playback' makes Web Audio ignore the silent (ringer) switch.
-    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
     if(actx.state!=='running')actx.resume();
     var b=actx.createBuffer(1,1,22050),src=actx.createBufferSource();
     src.buffer=b;src.connect(actx.destination);src.start(0);
@@ -244,7 +242,6 @@ function beeps(){
   try{
     if(!actx)unlockAudio();
     if(!actx){return;}
-    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
     // The context can be suspended/interrupted by iOS; play only once it is running again.
     if(actx.state==='running'){playEnd();return;}
     var done=false;
@@ -334,23 +331,48 @@ function buildAlarmWav(sec){
   }
   return new Blob([buf],{type:'audio/wav'});
 }
-var alarmPlayed=false,bgTimer=null,bgSwitchAt=0,bgSwitched=true;
+var alarmPlayed=false,fgNodes=[];
 function setSession(t){try{if(navigator.audioSession)navigator.audioSession.type=t;}catch(e){}}
-function bgWatch(){
-  // Music-mix mode: the track starts as 'ambient' (Spotify keeps playing), then flips to 'playback'
-  // just before the countdown so iOS pauses the music for the alarm.
-  if(!bg||!alarmArmed||bgSwitched)return;
-  if(bg.currentTime>=bgSwitchAt){bgSwitched=true;setSession('playback');}
-}
 function releaseAlarm(){
   // Let go of the audio session so the music app can resume.
-  if(bgTimer){clearInterval(bgTimer);bgTimer=null;}
   try{if(bg){bg.pause();bg.removeAttribute('src');bg.load();}}catch(e){}
   setSession('auto');
 }
+/* Mode "music keeps playing": no media track (that would pause Spotify). Countdown ticks are scheduled on Web Audio,
+   which mixes with other apps. Works only while the app is open on screen. */
+function cancelFg(){
+  fgNodes.forEach(function(n){try{n.stop();}catch(e){}});
+  fgNodes=[];
+}
+function scheduleFg(msLeft){
+  cancelFg();
+  try{
+    if(S.settings.countdown===false||!actx)return;
+    if(actx.state!=='running')actx.resume();
+    var now=actx.currentTime;
+    for(var k=5;k>=1;k--){
+      var dt=msLeft/1000-k;
+      if(dt<0)continue;
+      var st=now+dt,o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=800;
+      g.gain.setValueAtTime(0.0001,st);
+      g.gain.exponentialRampToValueAtTime(0.5,st+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,st+0.13);
+      o.connect(g);g.connect(actx.destination);
+      o.start(st);o.stop(st+0.14);
+      fgNodes.push(o);
+    }
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible')return;
+  cancelFg();
+  var s=S.session;
+  if(S.settings.musicMix===true&&s&&s.tEnd&&s.tEnd>Date.now())scheduleFg(s.tEnd-Date.now());
+});
 function disarmAlarm(){
   alarmArmed=false;alarmPlayed=false;
-  if(bgTimer){clearInterval(bgTimer);bgTimer=null;}
+  cancelFg();
   try{if(bg)bg.pause();}catch(e){}
 }
 function armAlarm(sec){
@@ -358,15 +380,14 @@ function armAlarm(sec){
   try{
     sec=Math.round(sec);
     if(!(sec>0)||sec>900)return;
+    if(S.settings.musicMix===true){scheduleFg(sec*1000);return;}
+    // Default mode: one media track (silence + countdown + sound) keeps playing with the screen off.
+    // iOS pauses other audio (Spotify) while it plays and lets it resume when it ends.
     if(!bg){
       bg=new Audio();bg.setAttribute('playsinline','');bg.preload='auto';
       bg.addEventListener('ended',function(){alarmPlayed=true;releaseAlarm();});
-      bg.addEventListener('timeupdate',bgWatch);
     }
-    var mix=S.settings.musicMix===true,lead=sec-(S.settings.countdown!==false?5:0)-1.2;
-    bgSwitchAt=lead;
-    bgSwitched=!mix||lead<=0;
-    setSession(bgSwitched?'playback':'ambient');
+    setSession('playback');
     var url=URL.createObjectURL(buildAlarmWav(sec));
     bg.src=url;
     if(bgUrl)URL.revokeObjectURL(bgUrl);
@@ -374,7 +395,6 @@ function armAlarm(sec){
     var p=bg.play();
     alarmArmed=true;
     if(p&&p.catch)p.catch(function(){alarmArmed=false;});
-    if(mix&&!bgSwitched)bgTimer=setInterval(bgWatch,300);
     try{if('mediaSession' in navigator&&window.MediaMetadata)navigator.mediaSession.metadata=new MediaMetadata({title:'מנוחה בין סטים',artist:'אימונים'});}catch(e){}
   }catch(e){alarmArmed=false;}
 }
@@ -569,8 +589,8 @@ function viewBackup(){
       '<button data-act="cdoff" class="'+(cd?'':'on')+'">כבויה</button></div>'+
       '<button class="bt-sm" data-act="cdtry" style="flex:none">נסה</button></div>'+
     '<h2 style="margin-top:16px">מוזיקה ברקע (Spotify)</h2><div class="row">'+
-      '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת בזמן המנוחה</button>'+
-      '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה עד הספירה (ניסיוני)</button></div></div></div>'+
+      '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת (הצליל גם במסך כבוי)</button>'+
+      '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה (הצליל רק כשהאפליקציה פתוחה)</button></div></div></div>'+
     '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
@@ -966,7 +986,7 @@ var A={
   mixoff:function(){S.settings.musicMix=false;save();render(true);},
   cdon:function(){S.settings.countdown=true;save();render(true);},
   cdoff:function(){S.settings.countdown=false;save();render(true);},
-  cdtry:function(){unlockAudio();S.settings.countdown=true;armAlarm(7);},
+  cdtry:function(){unlockAudio();S.settings.countdown=true;armAlarm(7);if(S.settings.musicMix===true)setTimeout(beeps,7000);},
   export:function(){doExport();},
   import:function(){$('file').click();}
 };
