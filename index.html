@@ -213,6 +213,8 @@ function unlockAudio(){
     var AC=window.AudioContext||window.webkitAudioContext;
     if(!AC)return;
     if(!actx)actx=new AC();
+    // iOS 16.4+: 'playback' makes Web Audio ignore the silent (ringer) switch.
+    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
     if(actx.state!=='running')actx.resume();
     var b=actx.createBuffer(1,1,22050),src=actx.createBufferSource();
     src.buffer=b;src.connect(actx.destination);src.start(0);
@@ -241,8 +243,21 @@ function loadEndSound(){
 function beeps(){
   try{
     if(!actx)unlockAudio();
-    if(!actx)return;
-    if(actx.state!=='running')actx.resume();
+    if(!actx){return;}
+    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    // The context can be suspended/interrupted by iOS; play only once it is running again.
+    if(actx.state==='running'){playEnd();return;}
+    var done=false;
+    function once(){if(done)return;done=true;playEnd();}
+    try{
+      var r=actx.resume();
+      if(r&&r.then)r.then(once,once);else once();
+    }catch(e){once();}
+    setTimeout(once,400);
+  }catch(e){oscBeeps();}
+}
+function playEnd(){
+  try{
     if(S.settings.endSound==='file'&&endBuf){
       var s=actx.createBufferSource();
       s.buffer=endBuf;s.connect(actx.destination);s.start(0);
@@ -265,6 +280,68 @@ function oscBeeps(){
       o.start(st);o.stop(st+0.26);
     });
   }catch(e){}
+}
+
+/* ---------- background-safe rest alarm ----------
+   iOS freezes the page when the screen is off / app is in background, so timers and Web Audio stop.
+   Media playback keeps running, so on timer start we play ONE pre-built track: silence for the rest time, then the alarm sound. */
+var bg=null,bgUrl=null,alarmArmed=false,ALR=22050;
+function dingSamples(){
+  try{
+    if(S.settings.endSound==='file'&&endBuf){
+      var d=endBuf.getChannelData(0),ratio=endBuf.sampleRate/ALR,n=Math.floor(d.length/ratio),out=new Float32Array(n);
+      for(var i=0;i<n;i++){
+        var a=Math.floor(i*ratio),b=Math.max(a+1,Math.min(d.length,Math.floor((i+1)*ratio))),sum=0;
+        for(var j=a;j<b;j++)sum+=d[j];
+        out[i]=sum/(b-a);
+      }
+      return out;
+    }
+  }catch(e){}
+  var freqs=[880,880,1175],len=Math.floor(ALR*0.9),o=new Float32Array(len);
+  freqs.forEach(function(f,k){
+    var st=Math.floor(k*0.32*ALR),m=Math.floor(0.26*ALR);
+    for(var i=0;i<m&&st+i<len;i++){
+      var t=i/ALR,env=t<0.02?t/0.02:Math.exp(-(t-0.02)*14);
+      o[st+i]+=0.6*env*Math.sin(2*Math.PI*f*t);
+    }
+  });
+  return o;
+}
+function buildAlarmWav(sec){
+  var ding=dingSamples(),lead=Math.floor(sec*ALR),total=lead+ding.length+Math.floor(ALR*0.2);
+  var buf=new ArrayBuffer(44+total*2),v=new DataView(buf);
+  function str(o,t){for(var i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));}
+  str(0,'RIFF');v.setUint32(4,36+total*2,true);str(8,'WAVE');str(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,ALR,true);v.setUint32(28,ALR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  str(36,'data');v.setUint32(40,total*2,true);
+  for(var i=0;i<ding.length;i++){
+    var x=Math.max(-1,Math.min(1,ding[i]));
+    v.setInt16(44+(lead+i)*2,Math.round(x*32767),true);
+  }
+  return new Blob([buf],{type:'audio/wav'});
+}
+function disarmAlarm(){
+  alarmArmed=false;
+  try{if(bg)bg.pause();}catch(e){}
+}
+function armAlarm(sec){
+  disarmAlarm();
+  try{
+    sec=Math.round(sec);
+    if(!(sec>0)||sec>900)return;
+    if(!bg){bg=new Audio();bg.setAttribute('playsinline','');bg.preload='auto';}
+    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    var url=URL.createObjectURL(buildAlarmWav(sec));
+    bg.src=url;
+    if(bgUrl)URL.revokeObjectURL(bgUrl);
+    bgUrl=url;
+    var p=bg.play();
+    alarmArmed=true;
+    if(p&&p.catch)p.catch(function(){alarmArmed=false;});
+    try{if('mediaSession' in navigator&&window.MediaMetadata)navigator.mediaSession.metadata=new MediaMetadata({title:'מנוחה בין סטים',artist:'אימונים'});}catch(e){}
+  }catch(e){alarmArmed=false;}
 }
 
 /* ---------- wake lock ---------- */
@@ -659,10 +736,12 @@ function render(keep){
 function startTimer(sec){
   var s=S.session;
   s.tEnd=Date.now()+sec*1000;s.tPause=null;s.tTotal=sec;
+  armAlarm(sec);
 }
 function stopTimer(){
   var s=S.session;
   if(s){s.tEnd=null;s.tPause=null;}
+  disarmAlarm();
 }
 setInterval(function(){
   var s=S.session;
@@ -670,7 +749,11 @@ setInterval(function(){
   var left=s.tEnd-Date.now();
   if(left<=0){
     s.tEnd=null;save();
-    ui.alarm=true;beeps();render();
+    ui.alarm=true;
+    var played=alarmArmed&&bg&&(bg.ended||!bg.paused);
+    alarmArmed=false;
+    if(!played)beeps();
+    render();
   }else{
     var t=$('timer');if(t)t.textContent=fmtT(left/1000);
     var a=$('rarc');if(a)a.setAttribute('stroke-dashoffset',ringOff(s));
@@ -735,8 +818,8 @@ var A={
   },
   tpause:function(){
     var s=S.session;
-    if(s.tEnd){s.tPause=Math.max(0,s.tEnd-Date.now());s.tEnd=null;}
-    else if(s.tPause!=null){s.tEnd=Date.now()+s.tPause;s.tPause=null;}
+    if(s.tEnd){s.tPause=Math.max(0,s.tEnd-Date.now());s.tEnd=null;disarmAlarm();}
+    else if(s.tPause!=null){armAlarm(s.tPause/1000);s.tEnd=Date.now()+s.tPause;s.tPause=null;}
     save();render();
   },
   tskip:function(){stopTimer();save();render();},
