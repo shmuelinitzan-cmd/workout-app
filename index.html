@@ -111,10 +111,10 @@ var storageOK=true;
 var S;
 
 function blank(){
-  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file'},session:null};
+  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file',countdown:true},session:null};
 }
 function cleanSettings(v){
-  return {endSound:(v&&v.endSound==='beep')?'beep':'file'};
+  return {endSound:(v&&v.endSound==='beep')?'beep':'file',countdown:!(v&&v.countdown===false)};
 }
 function num(v,def){
   var n=parseFloat(String(v).replace(',','.'));
@@ -316,6 +316,18 @@ function buildAlarmWav(sec){
   v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
   v.setUint32(24,ALR,true);v.setUint32(28,ALR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
   str(36,'data');v.setUint32(40,total*2,true);
+  if(S.settings.countdown!==false){
+    // race-start style: one short beep per second for the last 5 seconds, then the end sound
+    var tl=Math.floor(ALR*0.14);
+    for(var k=5;k>=1;k--){
+      var st=Math.floor((sec-k)*ALR);
+      if(st<0)continue;
+      for(var q=0;q<tl&&st+q<lead;q++){
+        var tt=q/ALR,env=Math.min(1,tt/0.005)*Math.min(1,(tl-q)/(ALR*0.015));
+        v.setInt16(44+(st+q)*2,Math.round(0.55*env*Math.sin(2*Math.PI*800*tt)*32767),true);
+      }
+    }
+  }
   for(var i=0;i<ding.length;i++){
     var x=Math.max(-1,Math.min(1,ding[i]));
     v.setInt16(44+(lead+i)*2,Math.round(x*32767),true);
@@ -523,12 +535,16 @@ function viewEdit(){
 }
 
 function viewBackup(){
-  var snd=S.settings.endSound;
+  var snd=S.settings.endSound,cd=S.settings.countdown!==false;
   return '<h1>גיבוי</h1>'+
     '<div class="card"><h2>צליל סיום מנוחה</h2><div class="row">'+
       '<div class="rng grow" style="margin:0"><button data-act="sndfile" class="'+(snd==='file'?'on':'')+'">צליל חדש</button>'+
       '<button data-act="sndbeep" class="'+(snd==='beep'?'on':'')+'">צלצול קלאסי</button></div>'+
-      '<button class="bt-sm" data-act="sndtry" style="flex:none">נסה</button></div></div>'+
+      '<button class="bt-sm" data-act="sndtry" style="flex:none">נסה</button></div>'+
+    '<h2 style="margin-top:16px">ספירה לאחור (5 שניות אחרונות)</h2><div class="row">'+
+      '<div class="rng grow" style="margin:0"><button data-act="cdon" class="'+(cd?'on':'')+'">פעילה</button>'+
+      '<button data-act="cdoff" class="'+(cd?'':'on')+'">כבויה</button></div>'+
+      '<button class="bt-sm" data-act="cdtry" style="flex:none">נסה</button></div></div>'+
     '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
@@ -920,6 +936,9 @@ var A={
   sndfile:function(){S.settings.endSound='file';save();loadEndSound();render(true);},
   sndbeep:function(){S.settings.endSound='beep';save();render(true);},
   sndtry:function(){unlockAudio();beeps();},
+  cdon:function(){S.settings.countdown=true;save();render(true);},
+  cdoff:function(){S.settings.countdown=false;save();render(true);},
+  cdtry:function(){unlockAudio();S.settings.countdown=true;armAlarm(7);},
   export:function(){doExport();},
   import:function(){$('file').click();}
 };
