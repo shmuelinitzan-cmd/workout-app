@@ -208,21 +208,26 @@ function $(id){return document.getElementById(id);}
 
 /* ---------- audio (iOS needs an unlock inside a user gesture) ---------- */
 var actx=null;
-function unlockAudio(){
+var actxUnlocked=false;
+function unlockAudio(force){
   try{
+    // Default mode plays a media track and must not hold any audio session otherwise (it pauses Spotify).
+    if(S.settings.musicMix!==true&&force!==true)return;
     var AC=window.AudioContext||window.webkitAudioContext;
     if(!AC)return;
     if(!actx)actx=new AC();
     if(actx.state!=='running')actx.resume();
-    var b=actx.createBuffer(1,1,22050),src=actx.createBufferSource();
-    src.buffer=b;src.connect(actx.destination);src.start(0);
-    loadEndSound();
+    if(!actxUnlocked){
+      actxUnlocked=true;
+      var b=actx.createBuffer(1,1,22050),src=actx.createBufferSource();
+      src.buffer=b;src.connect(actx.destination);src.start(0);
+    }
   }catch(e){}
 }
-// timerend.mp3 is decoded once on the unlocked context; any failure falls back to oscBeeps().
+// timerend.mp3 is decoded once on an OfflineAudioContext (no audio session involved).
 var endBuf=null,endLoading=false;
 function loadEndSound(){
-  if(!actx||endBuf||endLoading||S.settings.endSound!=='file')return;
+  if(endBuf||endLoading||S.settings.endSound!=='file')return;
   endLoading=true;
   try{
     fetch('./timerend.mp3').then(function(r){
@@ -230,7 +235,8 @@ function loadEndSound(){
       return r.arrayBuffer();
     }).then(function(ab){
       return new Promise(function(res,rej){
-        var p=actx.decodeAudioData(ab,res,rej);
+        var OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+        var p=new OC(1,1,44100).decodeAudioData(ab,res,rej);
         if(p&&p.then)p.then(res,rej);
       });
     }).then(function(buf){endBuf=buf;endLoading=false;}).catch(function(){endLoading=false;});
@@ -240,7 +246,7 @@ function loadEndSound(){
 
 function beeps(){
   try{
-    if(!actx)unlockAudio();
+    if(!actx)unlockAudio(true);
     if(!actx){return;}
     // The context can be suspended/interrupted by iOS; play only once it is running again.
     if(actx.state==='running'){playEnd();return;}
@@ -334,8 +340,10 @@ function buildAlarmWav(sec){
 var alarmPlayed=false,fgNodes=[];
 function setSession(t){try{if(navigator.audioSession)navigator.audioSession.type=t;}catch(e){}}
 function releaseAlarm(){
-  // Let go of the audio session so the music app can resume.
+  // Let go of the audio session completely so Spotify can resume and play normally.
   try{if(bg){bg.pause();bg.removeAttribute('src');bg.load();}}catch(e){}
+  bg=null;
+  if(bgUrl){try{URL.revokeObjectURL(bgUrl);}catch(e){}bgUrl=null;}
   setSession('auto');
 }
 /* Mode "music keeps playing": no media track (that would pause Spotify). Countdown ticks are scheduled on Web Audio,
@@ -373,7 +381,7 @@ document.addEventListener('visibilitychange',function(){
 function disarmAlarm(){
   alarmArmed=false;alarmPlayed=false;
   cancelFg();
-  try{if(bg)bg.pause();}catch(e){}
+  releaseAlarm();
 }
 function armAlarm(sec){
   disarmAlarm();
@@ -383,18 +391,16 @@ function armAlarm(sec){
     if(S.settings.musicMix===true){scheduleFg(sec*1000);return;}
     // Default mode: one media track (silence + countdown + sound) keeps playing with the screen off.
     // iOS pauses other audio (Spotify) while it plays and lets it resume when it ends.
-    if(!bg){
-      bg=new Audio();bg.setAttribute('playsinline','');bg.preload='auto';
-      bg.addEventListener('ended',function(){alarmPlayed=true;releaseAlarm();});
-    }
+    var el=new Audio();el.setAttribute('playsinline','');el.preload='auto';
+    el.addEventListener('ended',function(){if(bg===el){alarmPlayed=true;releaseAlarm();}});
+    bg=el;
     setSession('playback');
     var url=URL.createObjectURL(buildAlarmWav(sec));
-    bg.src=url;
-    if(bgUrl)URL.revokeObjectURL(bgUrl);
     bgUrl=url;
-    var p=bg.play();
+    el.src=url;
+    var p=el.play();
     alarmArmed=true;
-    if(p&&p.catch)p.catch(function(){alarmArmed=false;});
+    if(p&&p.catch)p.catch(function(){alarmArmed=false;releaseAlarm();});
     try{if('mediaSession' in navigator&&window.MediaMetadata)navigator.mediaSession.metadata=new MediaMetadata({title:'מנוחה בין סטים',artist:'אימונים'});}catch(e){}
   }catch(e){alarmArmed=false;}
 }
@@ -813,7 +819,7 @@ setInterval(function(){
   if(left<=0){
     s.tEnd=null;save();
     ui.alarm=true;
-    var played=alarmArmed&&bg&&(alarmPlayed||!bg.paused);
+    var played=alarmArmed&&(alarmPlayed||(bg&&!bg.paused));
     alarmArmed=false;
     if(!played)beeps();
     render();
@@ -982,14 +988,14 @@ var A={
   },
   sndfile:function(){S.settings.endSound='file';save();loadEndSound();render(true);},
   sndbeep:function(){S.settings.endSound='beep';save();render(true);},
-  sndtry:function(){unlockAudio();beeps();},
+  sndtry:function(){unlockAudio(true);beeps();},
   mixon:function(){S.settings.musicMix=true;save();render(true);},
   mixoff:function(){S.settings.musicMix=false;save();render(true);},
   cdon:function(){S.settings.countdown=true;save();render(true);},
   cdoff:function(){S.settings.countdown=false;save();render(true);},
   cdtry:function(){
     // Preview only: force the countdown on while the demo is built, then restore the saved setting.
-    unlockAudio();
+    unlockAudio(true);
     var prev=S.settings.countdown;
     S.settings.countdown=true;
     try{armAlarm(7);}finally{S.settings.countdown=prev;}
@@ -1060,6 +1066,7 @@ if(ui.screen==='workout'){
     if(s0.tEnd&&s0.tEnd<=Date.now()){s0.tEnd=null;ui.alarm=true;}
   }
 }
+loadEndSound();
 render();
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
