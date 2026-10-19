@@ -343,6 +343,7 @@ function releaseAlarm(){
   // Let go of the audio session completely so Spotify can resume and play normally.
   try{if(bg){bg.pause();bg.removeAttribute('src');bg.load();}}catch(e){}
   bg=null;
+  try{if('mediaSession' in navigator)navigator.mediaSession.metadata=null;}catch(e){}
   if(bgUrl){try{URL.revokeObjectURL(bgUrl);}catch(e){}bgUrl=null;}
   setSession('auto');
 }
@@ -401,7 +402,23 @@ function armAlarm(sec){
     var p=el.play();
     alarmArmed=true;
     if(p&&p.catch)p.catch(function(){alarmArmed=false;releaseAlarm();});
-    try{if('mediaSession' in navigator&&window.MediaMetadata)navigator.mediaSession.metadata=new MediaMetadata({title:'מנוחה בין סטים',artist:'אימונים'});}catch(e){}
+    try{
+      if('mediaSession' in navigator&&window.MediaMetadata){
+        var ms=navigator.mediaSession,cur=null;
+        try{cur=S.plan[S.session.w].exercises[S.session.i];}catch(e){}
+        ms.metadata=new MediaMetadata({
+          title:'מנוחה'+(cur&&cur.name?' · '+cur.name:''),
+          artist:'אימונים',
+          artwork:[{src:'./icon-512.png',sizes:'512x512',type:'image/png'},{src:'./icon-192.png',sizes:'192x192',type:'image/png'}]
+        });
+        // The track length equals the rest time, so the lock screen shows a countdown / progress bar.
+        // Hide skip/seek controls so a stray tap cannot jump past the alarm.
+        ['seekbackward','seekforward','previoustrack','nexttrack','seekto'].forEach(function(a){try{ms.setActionHandler(a,null);}catch(e){}});
+        el.addEventListener('loadedmetadata',function(){
+          try{if(isFinite(el.duration))ms.setPositionState({duration:el.duration,playbackRate:1,position:0});}catch(e){}
+        });
+      }
+    }catch(e){}
   }catch(e){alarmArmed=false;}
 }
 
