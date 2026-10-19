@@ -111,10 +111,10 @@ var storageOK=true;
 var S;
 
 function blank(){
-  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file',countdown:true},session:null};
+  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file',countdown:true,musicMix:false},session:null};
 }
 function cleanSettings(v){
-  return {endSound:(v&&v.endSound==='beep')?'beep':'file',countdown:!(v&&v.countdown===false)};
+  return {endSound:(v&&v.endSound==='beep')?'beep':'file',countdown:!(v&&v.countdown===false),musicMix:!!(v&&v.musicMix)};
 }
 function num(v,def){
   var n=parseFloat(String(v).replace(',','.'));
@@ -334,8 +334,23 @@ function buildAlarmWav(sec){
   }
   return new Blob([buf],{type:'audio/wav'});
 }
+var alarmPlayed=false,bgTimer=null,bgSwitchAt=0,bgSwitched=true;
+function setSession(t){try{if(navigator.audioSession)navigator.audioSession.type=t;}catch(e){}}
+function bgWatch(){
+  // Music-mix mode: the track starts as 'ambient' (Spotify keeps playing), then flips to 'playback'
+  // just before the countdown so iOS pauses the music for the alarm.
+  if(!bg||!alarmArmed||bgSwitched)return;
+  if(bg.currentTime>=bgSwitchAt){bgSwitched=true;setSession('playback');}
+}
+function releaseAlarm(){
+  // Let go of the audio session so the music app can resume.
+  if(bgTimer){clearInterval(bgTimer);bgTimer=null;}
+  try{if(bg){bg.pause();bg.removeAttribute('src');bg.load();}}catch(e){}
+  setSession('auto');
+}
 function disarmAlarm(){
-  alarmArmed=false;
+  alarmArmed=false;alarmPlayed=false;
+  if(bgTimer){clearInterval(bgTimer);bgTimer=null;}
   try{if(bg)bg.pause();}catch(e){}
 }
 function armAlarm(sec){
@@ -343,8 +358,15 @@ function armAlarm(sec){
   try{
     sec=Math.round(sec);
     if(!(sec>0)||sec>900)return;
-    if(!bg){bg=new Audio();bg.setAttribute('playsinline','');bg.preload='auto';}
-    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    if(!bg){
+      bg=new Audio();bg.setAttribute('playsinline','');bg.preload='auto';
+      bg.addEventListener('ended',function(){alarmPlayed=true;releaseAlarm();});
+      bg.addEventListener('timeupdate',bgWatch);
+    }
+    var mix=S.settings.musicMix===true,lead=sec-(S.settings.countdown!==false?5:0)-1.2;
+    bgSwitchAt=lead;
+    bgSwitched=!mix||lead<=0;
+    setSession(bgSwitched?'playback':'ambient');
     var url=URL.createObjectURL(buildAlarmWav(sec));
     bg.src=url;
     if(bgUrl)URL.revokeObjectURL(bgUrl);
@@ -352,6 +374,7 @@ function armAlarm(sec){
     var p=bg.play();
     alarmArmed=true;
     if(p&&p.catch)p.catch(function(){alarmArmed=false;});
+    if(mix&&!bgSwitched)bgTimer=setInterval(bgWatch,300);
     try{if('mediaSession' in navigator&&window.MediaMetadata)navigator.mediaSession.metadata=new MediaMetadata({title:'מנוחה בין סטים',artist:'אימונים'});}catch(e){}
   }catch(e){alarmArmed=false;}
 }
@@ -535,7 +558,7 @@ function viewEdit(){
 }
 
 function viewBackup(){
-  var snd=S.settings.endSound,cd=S.settings.countdown!==false;
+  var snd=S.settings.endSound,cd=S.settings.countdown!==false,mx=S.settings.musicMix===true;
   return '<h1>גיבוי</h1>'+
     '<div class="card"><h2>צליל סיום מנוחה</h2><div class="row">'+
       '<div class="rng grow" style="margin:0"><button data-act="sndfile" class="'+(snd==='file'?'on':'')+'">צליל חדש</button>'+
@@ -544,7 +567,10 @@ function viewBackup(){
     '<h2 style="margin-top:16px">ספירה לאחור (5 שניות אחרונות)</h2><div class="row">'+
       '<div class="rng grow" style="margin:0"><button data-act="cdon" class="'+(cd?'on':'')+'">פעילה</button>'+
       '<button data-act="cdoff" class="'+(cd?'':'on')+'">כבויה</button></div>'+
-      '<button class="bt-sm" data-act="cdtry" style="flex:none">נסה</button></div></div>'+
+      '<button class="bt-sm" data-act="cdtry" style="flex:none">נסה</button></div>'+
+    '<h2 style="margin-top:16px">מוזיקה ברקע (Spotify)</h2><div class="row">'+
+      '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת בזמן המנוחה</button>'+
+      '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה עד הספירה (ניסיוני)</button></div></div></div>'+
     '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
@@ -766,7 +792,7 @@ setInterval(function(){
   if(left<=0){
     s.tEnd=null;save();
     ui.alarm=true;
-    var played=alarmArmed&&bg&&(bg.ended||!bg.paused);
+    var played=alarmArmed&&bg&&(alarmPlayed||!bg.paused);
     alarmArmed=false;
     if(!played)beeps();
     render();
@@ -936,6 +962,8 @@ var A={
   sndfile:function(){S.settings.endSound='file';save();loadEndSound();render(true);},
   sndbeep:function(){S.settings.endSound='beep';save();render(true);},
   sndtry:function(){unlockAudio();beeps();},
+  mixon:function(){S.settings.musicMix=true;save();render(true);},
+  mixoff:function(){S.settings.musicMix=false;save();render(true);},
   cdon:function(){S.settings.countdown=true;save();render(true);},
   cdoff:function(){S.settings.countdown=false;save();render(true);},
   cdtry:function(){unlockAudio();S.settings.countdown=true;armAlarm(7);},
