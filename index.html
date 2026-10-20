@@ -730,7 +730,8 @@ function viewBackup(){
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
     '<button class="bt-sm" data-act="import">ייבא גיבוי</button>'+
-    '<input type="file" id="file" accept="application/json,.json" hidden></div>';
+    '<input type="file" id="file" accept="application/json,.json" hidden></div>'+
+    '<div class="dim small" id="ver" style="text-align:center;margin:16px 0"></div>';
 }
 
 /* ---------- progress ---------- */
@@ -926,7 +927,19 @@ function render(keep){
     return '<button data-act="nav" data-s="'+t[0]+'" class="'+(t[0]===tab?'on':'')+'">'+ic(t[2])+'<span>'+t[1]+'</span></button>';
   }).join('');
   $('ov').innerHTML=ui.alarm?'<div class="ov"><div>המנוחה נגמרה!</div><button data-act="alarmoff">המשך</button></div>':'';
+  if(sc==='backup')showVer();
   if(keep!==true)window.scrollTo(0,0);
+}
+// Which app version this phone has installed (name of the service worker's cache), shown at the bottom of the settings tab.
+function showVer(){
+  try{
+    if(!('caches' in window))return;
+    caches.keys().then(function(ks){
+      var v=ks.filter(function(k){return k.indexOf('workout-app-')===0;}).sort().pop()||'';
+      var el=$('ver');
+      if(el&&v)el.textContent='גרסה '+v.replace('workout-app-','');
+    });
+  }catch(e){}
 }
 
 /* ---------- timer ---------- */

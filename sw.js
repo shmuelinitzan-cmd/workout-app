@@ -1,5 +1,5 @@
 // Bump CACHE_VERSION on every deploy so phones pick up the new files.
-var CACHE_VERSION = 'v21';
+var CACHE_VERSION = 'v22';
 var CACHE = 'workout-app-' + CACHE_VERSION;
 var FILES = [
   './',
@@ -62,8 +62,35 @@ self.addEventListener('notificationclick', function (e) {
   );
 });
 
+// The page itself is network-first, so a new version shows up on the next launch instead of the one after it.
+// Offline, or when the network is slower than 3 seconds, the saved copy is used (the gym may have bad reception).
+function fetchFresh(url, ms) {
+  return new Promise(function (resolve, reject) {
+    var t = setTimeout(function () { reject(new Error('timeout')); }, ms);
+    fetch(url, { cache: 'no-cache' }).then(function (r) { clearTimeout(t); resolve(r); }, function (err) { clearTimeout(t); reject(err); });
+  });
+}
+
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+  var url = new URL(e.request.url);
+  var isPage = e.request.mode === 'navigate' ||
+    (url.origin === self.location.origin && /\/(index\.html)?$/.test(url.pathname));
+  if (isPage) {
+    e.respondWith(
+      fetchFresh(e.request.url, 3000).then(function (res) {
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { return c.put('./index.html', copy); }).catch(function () {});
+          return res;
+        }
+        return caches.match('./index.html', { ignoreSearch: true }).then(function (hit) { return hit || res; });
+      }).catch(function () {
+        return caches.match('./index.html', { ignoreSearch: true });
+      })
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(function (hit) {
       return hit || fetch(e.request).catch(function () {
