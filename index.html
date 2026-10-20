@@ -111,10 +111,10 @@ var storageOK=true;
 var S;
 
 function blank(){
-  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file',countdown:true,musicMix:false},session:null};
+  return {plan:NAMES.map(function(n){return {name:n,exercises:[]};}),log:[],bodyLog:[],settings:{endSound:'file',countdown:true,musicMix:false,push:false},session:null};
 }
 function cleanSettings(v){
-  return {endSound:(v&&v.endSound==='beep')?'beep':'file',countdown:!(v&&v.countdown===false),musicMix:!!(v&&v.musicMix)};
+  return {endSound:(v&&v.endSound==='beep')?'beep':'file',countdown:!(v&&v.countdown===false),musicMix:!!(v&&v.musicMix),push:!!(v&&v.push)};
 }
 function num(v,def){
   var n=parseFloat(String(v).replace(',','.'));
@@ -379,17 +379,21 @@ document.addEventListener('visibilitychange',function(){
   var s=S.session;
   if(S.settings.musicMix===true&&s&&s.tEnd&&s.tEnd>Date.now())scheduleFg(s.tEnd-Date.now());
 });
-function disarmAlarm(){
+function disarmAlarm(keepPush){
   alarmArmed=false;alarmPlayed=false;
   cancelFg();
   releaseAlarm();
+  if(keepPush!==true)pushCancel();
 }
-function armAlarm(sec){
-  disarmAlarm();
+function armAlarm(sec,preview){
+  disarmAlarm(true); // the push is replaced below (a cancel racing a new schedule could arrive out of order)
+  function ps(){if(preview)pushCancel();else pushSchedule(sec);} // the settings preview must not send a real push
   try{
     sec=Math.round(sec);
-    if(!(sec>0)||sec>900)return;
-    if(S.settings.musicMix===true){scheduleFg(sec*1000);return;}
+    if(!(sec>0)||sec>900){pushCancel();return;}
+    // Music mode: no media track, so a lock-screen notification is the only way to hear about the end.
+    if(S.settings.musicMix===true){scheduleFg(sec*1000);ps();return;}
+    pushCancel(); // the media track covers the screen-off case; the push only steps in if the track cannot play
     // Default mode: one media track (silence + countdown + sound) keeps playing with the screen off.
     // iOS pauses other audio (Spotify) while it plays and lets it resume when it ends.
     var el=new Audio();el.setAttribute('playsinline','');el.preload='auto';
@@ -415,7 +419,7 @@ function armAlarm(sec){
     el.src=url;
     var p=el.play();
     alarmArmed=true;
-    if(p&&p.catch)p.catch(function(){alarmArmed=false;releaseAlarm();});
+    if(p&&p.catch)p.catch(function(){alarmArmed=false;releaseAlarm();ps();});
     try{
       if('mediaSession' in navigator&&window.MediaMetadata){
         var ms=navigator.mediaSession,cur=null;
@@ -428,7 +432,75 @@ function armAlarm(sec){
         // The track length equals the rest time, so the lock screen shows a countdown / progress bar.
       }
     }catch(e){}
-  }catch(e){alarmArmed=false;}
+  }catch(e){alarmArmed=false;ps();}
+}
+
+/* ---------- lock-screen notification (Web Push) ----------
+   iOS cannot run page code or timers with the screen off, and a media track would pause Spotify. So the rest end is
+   scheduled on a tiny server (push-worker/) which sends a Web Push at the right time; sw.js turns it into a notification.
+   Filled in by push-worker/setup.mjs: */
+var PUSH_URL='https://workout-push.nitzan-workout.workers.dev';
+var VAPID_PUB='BLe2htAnoeknkYi0Pkk1vZ08dlISRnU9l4J3_k3PX8bYe5gIk8WQtQMi8XmxK-amw1C8Ci3VA8mVp2fbsBij7yc';
+var pushSub=null,pushArmed=false,pushGen=0;
+function pushSupported(){
+  return !!(PUSH_URL&&VAPID_PUB&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window);
+}
+function pushOn(){
+  return pushSupported()&&S.settings.push===true&&!!pushSub&&Notification.permission==='granted';
+}
+function b64uToBytes(s){
+  var p=s.replace(/-/g,'+').replace(/_/g,'/');p+='==='.slice((p.length+3)%4);
+  var r=atob(p),o=new Uint8Array(r.length);
+  for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);
+  return o;
+}
+// POST to the worker. gen!==undefined: retry once, but only if nothing newer was scheduled/cancelled meanwhile.
+function pushPost(path,body,gen){
+  function go(retry){
+    var req;
+    try{
+      req=fetch(PUSH_URL+path,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body),keepalive:true})
+        .then(function(r){return r.ok;},function(){return false;});
+    }catch(e){return Promise.resolve(false);}
+    return req.then(function(ok){
+      if(ok||!retry||gen===undefined)return ok;
+      return new Promise(function(res){setTimeout(function(){res(gen===pushGen?go(false):false);},1500);});
+    });
+  }
+  return go(true);
+}
+// Text shown in the notification; sw.js reads it from the Cache API (a push carries no payload).
+function pushMeta(m){
+  try{
+    if(!('caches' in window))return;
+    caches.open('workout-meta').then(function(c){
+      return c.put('./push-meta.json',new Response(JSON.stringify(m),{headers:{'Content-Type':'application/json'}}));
+    }).catch(function(){});
+  }catch(e){}
+}
+function restMeta(){
+  try{
+    var s=S.session,ex=S.plan[s.w].exercises[s.i],d=s.done[ex.id]||0;
+    return {title:'המנוחה נגמרה',body:ex.name+' · '+(d<ex.sets?'סט '+(d+1)+' מתוך '+ex.sets:'סיימת את כל הסטים')};
+  }catch(e){return {title:'המנוחה נגמרה',body:'הגיע הזמן לסט הבא'};}
+}
+function pushSchedule(sec){
+  if(!pushOn()||!(sec>2)){pushCancel();return;}
+  pushMeta(restMeta());
+  pushArmed=true;
+  pushPost('/schedule',{sub:{endpoint:pushSub.endpoint},delay:Math.round(sec)},++pushGen);
+}
+function pushCancel(){
+  if(!pushArmed)return;
+  pushArmed=false;
+  if(pushSub)pushPost('/cancel',{endpoint:pushSub.endpoint},++pushGen);
+}
+function pushInit(){
+  if(!pushSupported())return;
+  navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription();}).then(function(sub){
+    pushSub=sub?sub.toJSON():null;
+    if(ui.screen==='backup')render(true);
+  }).catch(function(){});
 }
 // Hide skip/seek controls so a stray tap cannot jump past the alarm. Set once, not per rest.
 try{
@@ -455,7 +527,7 @@ document.addEventListener('visibilitychange',function(){
 });
 
 /* ---------- ui state ---------- */
-var ui={screen:'home',wi:0,editId:null,logIdx:-1,alarm:false,summary:null,pkind:'ex',pk:'',range:'h',bodyAll:false,bodyEdit:null};
+var ui={screen:'home',wi:0,editId:null,logIdx:-1,alarm:false,summary:null,pkind:'ex',pk:'',range:'h',bodyAll:false,bodyEdit:null,pushMsg:''};
 
 function curWorkout(){return S.plan[S.session?S.session.w:ui.wi];}
 
@@ -615,6 +687,19 @@ function viewEdit(){
   return h;
 }
 
+function pushActive(){return pushOn();}
+function viewPush(){
+  var h='<h2 style="margin-top:16px">התראה במסך נעול</h2>';
+  if(!PUSH_URL||!VAPID_PUB)return h+'<p class="dim small" style="margin:0">טרם הוגדר שרת התראות. אחרי ההגדרה (push-worker/setup.mjs) האפשרות תופיע כאן.</p>';
+  if(!pushSupported())return h+'<p class="dim small" style="margin:0">דורש iOS 16.4 ומעלה, והאפליקציה צריכה להיות פתוחה ממסך הבית.</p>';
+  var on=pushOn();
+  return h+'<div class="row">'+
+      '<div class="rng grow" style="margin:0"><button data-act="pushoff" class="'+(on?'':'on')+'">כבויה</button>'+
+      '<button data-act="pushon" class="'+(on?'on':'')+'">פעילה</button></div>'+
+      (on?'<button class="bt-sm" data-act="pushtry" style="flex:none">נסה</button>':'')+'</div>'+
+    '<p class="dim small" style="margin:10px 0 0">'+esc(ui.pushMsg||'בסוף המנוחה תגיע התראה גם כשהמסך כבוי, והמוזיקה ממשיכה. הצליל הוא צליל ההתראה הרגיל של האייפון. במצב "נעצרת" הצליל כבר עובד במסך כבוי, ולכן ההתראה משמשת רק כגיבוי.')+'</p>';
+}
+
 function viewBackup(){
   var snd=S.settings.endSound,cd=S.settings.countdown!==false,mx=S.settings.musicMix===true;
   return '<h1>גיבוי</h1>'+
@@ -629,7 +714,8 @@ function viewBackup(){
     '<h2 style="margin-top:16px">מוזיקה ברקע (Spotify)</h2><div class="row">'+
       '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת</button>'+
       '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה</button></div></div>'+
-      '<p class="dim small" style="margin:10px 0 0">'+(mx?'המוזיקה ממשיכה, אבל הצליל נשמע רק כשהאפליקציה פתוחה על המסך.':'המוזיקה נעצרת בזמן המנוחה, והצליל נשמע גם כשהמסך כבוי.')+'</p></div>'+
+      '<p class="dim small" style="margin:10px 0 0">'+(mx?(pushActive()?'המוזיקה ממשיכה. כשהאפליקציה פתוחה נשמע הצליל, וכשהמסך כבוי תגיע התראה.':'המוזיקה ממשיכה, אבל הצליל נשמע רק כשהאפליקציה פתוחה על המסך. כדי לקבל התראה גם כשהמסך כבוי, הפעל "התראה במסך נעול" למטה.'):'המוזיקה נעצרת בזמן המנוחה, והצליל נשמע גם כשהמסך כבוי.')+'</p>'+
+    viewPush()+'</div>'+
     '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
     '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
     '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
@@ -851,11 +937,15 @@ setInterval(function(){
   if(left<=0){
     s.tEnd=null;save();
     ui.alarm=true;
+    // Only when on screen: a page that is hidden but still running may not be audible, and the notification must then stay.
+    if(document.visibilityState==='visible')pushCancel();
     var played=alarmArmed&&(alarmPlayed||(bg&&!bg.paused));
     alarmArmed=false;
     if(!played)beeps();
     render();
   }else{
+    // The app is on screen and will sound the alarm itself, so drop the notification (a hidden page is frozen and cannot do this).
+    if(pushArmed&&left<4000&&document.visibilityState==='visible')pushCancel();
     var t=$('timer');if(t)t.textContent=fmtT(left/1000);
     var a=$('rarc');if(a)a.setAttribute('stroke-dashoffset',ringOff(s));
   }
@@ -878,6 +968,7 @@ function endSession(){
   buildSummary();ui.screen='summary';save();render();
 }
 function leaveSession(){
+  disarmAlarm(); // also cancels a pending notification
   S.session=null;ui.summary=null;ui.alarm=false;wakeOff();save();
   ui.screen='home';render();
 }
@@ -891,7 +982,7 @@ function gotoEx(i){
 /* ---------- actions ---------- */
 var A={
   nav:function(el){
-    ui.screen=el.dataset.s;ui.editId=null;render();
+    ui.screen=el.dataset.s;ui.editId=null;ui.pushMsg='';render();
   },
   goplan:function(){ui.screen='plan';ui.editId=null;render();},
   start:function(el){
@@ -1023,6 +1114,33 @@ var A={
   sndtry:function(){unlockAudio(true);beeps();},
   mixon:function(){S.settings.musicMix=true;save();render(true);},
   mixoff:function(){S.settings.musicMix=false;save();render(true);},
+  pushon:function(){
+    // Must start inside the tap: iOS only shows the permission prompt for a user gesture.
+    if(!pushSupported())return;
+    ui.pushMsg='';
+    var perm;
+    try{perm=Notification.requestPermission();}catch(e){perm=Promise.resolve('denied');}
+    Promise.resolve(perm).then(function(p){
+      if(p!=='granted')throw new Error('denied');
+      return navigator.serviceWorker.ready;
+    }).then(function(reg){
+      return reg.pushManager.getSubscription().then(function(sub){
+        return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64uToBytes(VAPID_PUB)});
+      });
+    }).then(function(sub){
+      pushSub=sub.toJSON();S.settings.push=true;save();ui.pushMsg='';render(true);
+    }).catch(function(e){
+      ui.pushMsg=(e&&e.message==='denied')?'ההרשאה לא ניתנה. אפשר לאשר אותה בהגדרות האייפון ← התראות ← אימונים.':'ההפעלה נכשלה. ודא שהאפליקציה נפתחת ממסך הבית ושיש חיבור לאינטרנט.';
+      render(true);
+    });
+  },
+  pushoff:function(){S.settings.push=false;pushCancel();ui.pushMsg='';save();render(true);},
+  pushtry:function(){
+    if(!pushOn())return;
+    pushMeta({title:'בדיקת התראה',body:'ההתראה עובדת גם כשהמסך כבוי'});
+    pushPost('/schedule',{sub:{endpoint:pushSub.endpoint},delay:8});
+    ui.pushMsg='ההתראה תגיע בעוד 8 שניות. נעל את המסך עכשיו.';render(true);
+  },
   cdon:function(){S.settings.countdown=true;save();render(true);},
   cdoff:function(){S.settings.countdown=false;save();render(true);},
   cdtry:function(){
@@ -1030,7 +1148,7 @@ var A={
     unlockAudio(true);
     var prev=S.settings.countdown;
     S.settings.countdown=true;
-    try{armAlarm(7);}finally{S.settings.countdown=prev;}
+    try{armAlarm(7,true);}finally{S.settings.countdown=prev;}
     if(S.settings.musicMix===true)setTimeout(beeps,7000);
   },
   export:function(){doExport();},
@@ -1100,6 +1218,7 @@ if(ui.screen==='workout'){
 }
 loadEndSound();
 render();
+pushInit();
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('./sw.js').catch(function(){});

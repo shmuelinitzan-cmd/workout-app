@@ -1,0 +1,17 @@
+name = "workout-push"
+main = "worker.js"
+compatibility_date = "2025-10-01"
+
+[vars]
+# Only the app's own origin may call the worker from a browser.
+ALLOWED_ORIGIN = "https://shmuelinitzan-cmd.github.io"
+# Contact URL sent in the VAPID token (Apple requires a mailto: or https: subject).
+VAPID_SUBJECT = "https://shmuelinitzan-cmd.github.io/workout-app/"
+
+[[durable_objects.bindings]]
+name = "PUSH"
+class_name = "PushTimer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PushTimer"]
