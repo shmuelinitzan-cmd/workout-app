@@ -1,5 +1,5 @@
 // Bump CACHE_VERSION on every deploy so phones pick up the new files.
-var CACHE_VERSION = 'v23';
+var CACHE_VERSION = 'v24';
 var CACHE = 'workout-app-' + CACHE_VERSION;
 var FILES = [
   './',
@@ -74,6 +74,20 @@ function fetchFresh(url, ms) {
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
+  // Google Fonts (Heebo): keep a copy after the first load so the font also works offline.
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    e.respondWith(
+      caches.open('workout-fonts').then(function (c) {
+        return c.match(e.request).then(function (hit) {
+          return hit || fetch(e.request).then(function (res) {
+            if (res && (res.ok || res.type === 'opaque')) c.put(e.request, res.clone()).catch(function () {});
+            return res;
+          });
+        });
+      })
+    );
+    return;
+  }
   var isPage = e.request.mode === 'navigate' ||
     (url.origin === self.location.origin && /\/(index\.html)?$/.test(url.pathname));
   if (isPage) {

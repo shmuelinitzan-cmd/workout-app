@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>אימונים</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0D0D0F">
+<meta name="theme-color" content="#0B0B0D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,89 +12,148 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" type="image/png" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0D0D0F;--card:#1A1A1E;--line:#26262B;--line2:#3A3A42;--text:#F2F2F4;--dim:#8E8E96;--acc:#FF7A1A;--accText:#0D0D0F;--danger:#F0706B}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:18px;font-weight:500;line-height:1.4;overflow-x:hidden;touch-action:manipulation}
-#app{min-height:100vh;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 20px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 100px) calc(env(safe-area-inset-left) + 18px);max-width:640px;margin:0 auto}
-#app.noNav{padding-bottom:calc(env(safe-area-inset-bottom) + 28px)}
-h1{font-size:30px;font-weight:700;margin:8px 0 20px;overflow-wrap:anywhere}
-h2{font-size:22px;font-weight:700;margin:0 0 8px;overflow-wrap:anywhere}
-p{margin:0 0 12px}
+:root{--bg:#0B0B0D;--card:#141417;--card2:#1A1A1E;--line:#222228;--line2:#2A2A30;--track:#1E1E23;--text:#F4F4F6;--dim:#A1A1AA;--dim2:#71717A;--acc:#FF7A1A;--accText:#0B0B0D;--danger:#F0706B;--dangerLine:#5A2E2D}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Heebo,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:17px;font-weight:500;line-height:1.4;overflow-x:hidden;touch-action:manipulation;-webkit-text-size-adjust:100%}
+#app{min-height:100vh;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 20px) calc(env(safe-area-inset-right) + 20px) calc(env(safe-area-inset-bottom) + 108px) calc(env(safe-area-inset-left) + 20px);max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+#app.noNav{padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
+h1{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.5px;margin:4px 0 4px;overflow-wrap:anywhere}
+h2{font-size:18px;font-weight:700;margin:0;overflow-wrap:anywhere}
+p{margin:0}
 .dim{color:var(--dim)}
-.small{font-size:15px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;min-width:0}
-.row{display:flex;gap:12px;align-items:center;min-width:0}
+.dim2{color:var(--dim2)}
+.small{font-size:14px}
+.sec{font-size:14px;font-weight:500;color:var(--dim2);margin-top:6px}
+.acc{color:var(--acc)}
+.num{font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.card.list{padding:4px 16px}
+.row{display:flex;gap:10px;align-items:center;min-width:0}
 .row>*{min-width:0}
 .grow{flex:1}
 .between{justify-content:space-between}
-.ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.ico.fill{fill:currentColor}
-button,.btn{font:inherit;font-size:19px;font-weight:700;color:var(--text);background:transparent;border:1.5px solid var(--line2);border-radius:14px;min-height:56px;padding:0 18px;cursor:pointer;user-select:none;-webkit-user-select:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-button:active{background:#232328}
-button:disabled{opacity:.4}
-.pri{background:var(--acc);border-color:var(--acc);color:var(--accText)}
-.pri:active{background:var(--acc);filter:brightness(.9)}
-.dng{color:var(--danger);border-color:#5A2E2D}
-.big{min-height:72px;font-size:22px;width:100%}
-.sq{width:56px;padding:0;flex:none}
-.bt{font-size:15px;font-weight:500;min-height:52px;border-radius:12px;padding:0 12px;white-space:nowrap}
-.bt-pri{font-size:18px;font-weight:700;min-height:56px;width:100%}
-.bt-main{font-size:16px;font-weight:600;min-height:54px}
-.bt-sec{font-size:14px;font-weight:500;min-height:52px}
-.bt-ico{width:52px;padding:0;flex:none;min-height:52px}
-.bt-ico .ico{width:20px;height:20px}
-.bt-ico.s{width:44px;min-height:44px}
-.bt-sm{font-size:14px;font-weight:500;min-height:44px;border-radius:12px;padding:0 16px;white-space:nowrap}
-.bwf{gap:8px;align-items:flex-end}
-.bwf label{font-size:14px;white-space:nowrap}
-.row.bwf input{font-size:17px;min-height:48px;padding:0 8px}
-.bwf button{padding:0 12px;min-height:48px}
-.play{width:64px;height:64px;border-radius:50%;padding:0;flex:none;background:var(--acc);border-color:var(--acc);color:var(--accText)}
-.play:active{background:var(--acc);filter:brightness(.9)}
-.play .ico{width:26px;height:26px}
-input[type=text],input[type=number],input[type=date],input:not([type]){font:inherit;font-size:20px;color:var(--text);background:var(--bg);border:1.5px solid var(--line2);border-radius:12px;min-height:56px;padding:0 14px;width:100%}
-input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;text-align:right;padding:0 8px;font-size:18px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ico.fill{fill:currentColor;stroke:none}
+button{font:inherit;font-size:16px;font-weight:500;color:var(--text);background:transparent;border:1px solid var(--line2);border-radius:14px;min-height:50px;padding:0 16px;cursor:pointer;user-select:none;-webkit-user-select:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+button:active{filter:brightness(1.25)}
+button:disabled{opacity:.35}
+.pri{background:var(--acc);border-color:var(--acc);color:var(--accText);font-weight:800}
+.pri:active{filter:brightness(.9)}
+.soft{background:var(--card);border-color:transparent;color:var(--dim);min-height:46px;border-radius:12px;font-size:15px;padding:0 6px;white-space:nowrap}
+.dng{color:var(--danger);border-color:var(--dangerLine)}
+.big{min-height:64px;border-radius:18px;font-size:20px;width:100%}
+.lnk{border:0;min-height:44px;color:var(--dim);font-size:15px}
+.ib{width:48px;min-height:48px;padding:0;flex:none}
+.ib.r{border-radius:24px}
+.ib.s{width:44px;min-height:44px;border-radius:12px}
+.ib.s .ico{width:18px;height:18px}
+.full{width:100%}
+input[type=text],input[type=number],input[type=date],input:not([type]){font:inherit;font-size:18px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-radius:12px;min-height:48px;padding:0 12px;width:100%;-webkit-appearance:none;appearance:none}
+input[type=date]{min-width:0;text-align:right;padding:0 8px;font-size:17px}
 input:focus{outline:none;border-color:var(--acc)}
-label{display:block;font-size:15px;color:var(--dim);margin-bottom:4px}
+label{display:block;font-size:13px;color:var(--dim);margin-bottom:4px}
 .field{flex:1;min-width:0}
-.chk{display:flex;gap:12px;align-items:center;font-size:20px;color:var(--text);min-height:56px;margin:0}
-.chk input{width:28px;height:28px;flex:none;accent-color:var(--acc)}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-nav button{flex:1;flex-direction:column;gap:4px;background:none;border:0;border-radius:0;font-size:12px;font-weight:500;color:var(--dim);min-height:62px;padding:6px 2px}
-nav button .ico{width:24px;height:24px}
-nav button.on{color:var(--acc)}
-.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:10px 0 20px}
-.prog i{display:block;height:100%;background:var(--acc)}
-.wname{font-size:32px;font-weight:700;margin:8px 0 4px;overflow-wrap:anywhere}
-.wgt{font-size:28px;color:var(--acc);font-weight:700;margin-bottom:18px}
-.reps{color:var(--text)}
-.err{background:#2A1718;border:1px solid #5A2E2D;color:var(--danger);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:17px}
-.ring{position:relative;width:min(196px,100%);aspect-ratio:1;margin:0 auto 6px}
-.ring svg{position:absolute;inset:0;width:100%;height:100%}
-.ring .rt{fill:none;stroke:var(--line);stroke-width:3}
-.ring .ra{fill:none;stroke:var(--acc);stroke-width:3;transform:rotate(-90deg);transform-origin:60px 60px}
-.timer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;font-variant-numeric:tabular-nums}
-.timer.idle{color:var(--dim)}
-.setc{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
-.setc .ico{color:var(--acc);width:22px;height:22px}
-.tag{display:inline-block;border:1px solid var(--line2);border-radius:8px;padding:2px 10px;font-size:15px;color:var(--dim)}
-.ov{position:fixed;inset:0;background:var(--acc);color:var(--accText);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:10;font-size:38px;font-weight:700;text-align:center;padding:24px}
-.ov button{background:var(--bg);border-color:var(--bg);color:var(--text);width:80%}
-.sep{height:1px;background:var(--line);margin:12px 0}
-.warnbox{background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+.chk{display:flex;gap:12px;align-items:center;font-size:16px;color:var(--text);min-height:48px;margin:0}
+.chk input{width:24px;height:24px;flex:none;accent-color:var(--acc)}
+/* segmented control */
+.seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg.in{background:var(--bg);border:0;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:38px;border:0;border-radius:9px;color:var(--dim);font-size:14px;padding:0 6px;white-space:nowrap}
+.seg button.on{background:var(--line2);color:var(--text);font-weight:700}
+.seg.acc button.on{background:var(--acc);color:var(--accText);font-weight:800}
+/* switch */
+.sw{width:52px;min-height:32px;height:32px;border-radius:16px;border:0;background:var(--line2);padding:3px;justify-content:flex-end;flex:none}
+.sw i{width:26px;height:26px;border-radius:13px;background:var(--dim);display:block}
+.sw.on{background:var(--acc);justify-content:flex-start}
+.sw.on i{background:var(--bg)}
+/* list rows */
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.lrow:last-child{border-bottom:0}
 .item{cursor:pointer}
-.chart{width:100%;height:auto;display:block;direction:ltr}
-.rng{display:flex;gap:6px;margin-bottom:14px}
-.rng button{flex:1;font-size:14px;font-weight:500;min-height:40px;border-radius:10px;padding:0 2px;line-height:1.15;white-space:nowrap}
-.rng button.on{background:var(--acc);border-color:var(--acc);color:var(--accText)}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tile b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--dim)}
+.badge{font-size:13px;font-weight:700;color:var(--acc);white-space:nowrap}
+.pills{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.pills i{width:22px;height:6px;border-radius:3px;background:var(--line2);display:block}
+.pills i.on{background:var(--acc)}
+.pills.w i{width:26px;height:8px;border-radius:4px}
+.warnbox{background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:14px;padding:12px 14px;font-size:15px}
+.err{background:#2A1718;border:1px solid var(--dangerLine);color:var(--danger);border-radius:12px;padding:10px 12px;font-size:15px}
+/* nav */
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg);border-top:1px solid var(--track);padding:6px calc(env(safe-area-inset-right) + 4px) calc(env(safe-area-inset-bottom) + 6px) calc(env(safe-area-inset-left) + 4px);z-index:5}
+nav button{flex:1;flex-direction:column;gap:4px;background:none;border:0;border-radius:0;font-size:12px;font-weight:500;color:#8E8E96;min-height:56px;padding:0 2px}
+nav button .ico{width:24px;height:24px;stroke-width:1.8}
+nav button.on{color:var(--acc);font-weight:700}
+/* workout */
+.wk{flex:1;display:flex;flex-direction:column;gap:20px}
+.wtop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wtop .t{font-size:15px;color:var(--dim);text-align:center}
+.bar{height:4px;background:var(--track);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:2px}
+.wname{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.5px;overflow-wrap:anywhere;margin:0}
+.wmeta{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:4px}
+.wgt{font-size:30px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums}
+.wgt small{font-size:17px;font-weight:500}
+.ring{position:relative;width:min(248px,72vw);aspect-ratio:1;margin:0 auto}
+.ring>svg{position:absolute;inset:0;width:100%;height:100%}
+.ring .rt{fill:none;stroke:var(--track);stroke-width:10}
+.ring .ra{fill:none;stroke:var(--acc);stroke-width:10;stroke-linecap:round}
+.ring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}
+.ring .lb{font-size:15px;color:var(--dim)}
+.ring .tm{font-size:64px;font-weight:800;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.ring .sb{font-size:14px;color:var(--dim2)}
+.ring .ok{color:var(--acc)}
+.ring .ok .ico{width:56px;height:56px;stroke-width:2.2}
+.setbox{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px}
+.setbox .c{display:flex;flex-direction:column;align-items:center;gap:6px}
+.setbox .c b{font-size:22px;font-weight:800}
+.setbox .c b span{color:var(--dim2);font-weight:500}
+.wbottom{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+/* home */
+.wcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.wcard .nm{font-size:20px;font-weight:800}
+.cur{background:var(--card);border:1px solid var(--acc);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px}
+/* log */
+.lcard{width:100%;text-align:right;justify-content:flex-start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;gap:12px;min-height:0}
+.lcard .d{width:48px;flex:none;text-align:center}
+.lcard .d b{display:block;font-size:22px;font-weight:800;line-height:1}
+.lcard .d span{font-size:12px;color:var(--dim)}
+/* plan */
+.excard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 12px 14px;display:flex;align-items:center;gap:10px}
+.excard .mv{display:flex;flex-direction:column;gap:2px;flex:none}
+.excard .mv button{width:36px;min-height:28px;padding:0;border:0;color:var(--dim2);border-radius:8px}
+.excard .mv .ico{width:18px;height:18px}
+.form{background:var(--card2);border:1px solid var(--acc);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.addbtn{border-style:dashed;border-color:#3A3A42;font-weight:700;min-height:52px}
+/* progress */
+.chart{width:100%;height:auto;display:block;direction:ltr;margin-top:8px}
 .trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .trow:last-child{border-bottom:0}
 .trow .c1{flex:2;min-width:0}
-.trow .c2{flex:1;text-align:center;font-weight:700}
+.trow .c2{flex:1;text-align:center;font-weight:800}
 .trow .c3{flex:1;text-align:left;direction:ltr;color:var(--dim)}
-.up{color:var(--acc)!important}
+.up{color:var(--acc)!important;font-weight:700}
 .dn{color:var(--text)!important}
+.bwf{gap:8px;align-items:flex-end}
+.bwf button{min-height:48px;padding:0 14px}
+/* rest-end overlay: flashes a few times to catch the eye, then stays */
+.ov{position:fixed;inset:0;z-index:10;background:var(--acc);color:var(--accText);display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 40px) 24px calc(env(safe-area-inset-bottom) + 24px);text-align:center;animation:ovflash .5s ease-in-out 6}
+.ov .t{font-size:15px;font-weight:700;opacity:.75}
+.ov .mid{margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:10px}
+.ov .mid .ico{width:64px;height:64px;stroke-width:2}
+.ov h2{font-size:44px;line-height:1.05;font-weight:800}
+.ov .ex{font-size:20px;font-weight:500}
+.ov .w{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.ov .w small{font-size:17px;font-weight:500}
+.ov button{width:100%;max-width:600px;min-height:68px;border-radius:18px;border:0;background:var(--bg);color:var(--text);font-size:21px;font-weight:800}
+@keyframes ovflash{0%,100%{background:var(--acc)}50%{background:#FFFFFF}}
 </style></head>
 <body>
 <div id="app"></div>
@@ -533,28 +592,9 @@ var ui={screen:'home',wi:0,editId:null,logIdx:-1,alarm:false,summary:null,pkind:
 function curWorkout(){return S.plan[S.session?S.session.w:ui.wi];}
 
 /* ---------- views ---------- */
-function viewHome(){
-  var h='<h1>אימונים</h1>';
-  if(!storageOK)h+='<div class="warnbox">אחסון הדפדפן לא זמין — הנתונים לא יישמרו.</div>';
-  if(S.session){
-    h+='<div class="card"><h2>אימון בתהליך</h2><p class="dim">'+esc(S.plan[S.session.w].name)+'</p>'+
-      '<button class="pri big" data-act="resume">המשך אימון</button></div>';
-  }
-  if(total()===0){
-    h+='<div class="card"><h2>התחלה</h2><p class="dim">התוכנית ריקה. הוסף תרגילים לאימונים.</p>'+
-      '<button class="pri big" data-act="goplan">הוסף תרגיל</button></div>';
-  }
-  S.plan.forEach(function(w,i){
-    h+='<div class="card"><div class="row between"><div class="grow"><h2>'+esc(w.name)+'</h2>'+
-      '<div class="dim">'+w.exercises.length+' תרגילים</div></div>'+
-      '<button class="play" aria-label="התחל '+esc(w.name)+'" data-act="start" data-i="'+i+'">'+ic('play','fill')+'</button></div></div>';
-  });
-  return h;
-}
-
 /* ---------- icons (inline, line style) ---------- */
 var ICONS={
-  play:'<path d="M8 5.5v13l11-6.5z"/>',
+  play:'<path d="M7 5.5v13a1 1 0 0 0 1.5.86l10-6.5a1 1 0 0 0 0-1.72l-10-6.5A1 1 0 0 0 7 5.5z"/>',
   close:'<path d="M6 6l12 12M18 6L6 18"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   chev:'<path d="M9 6l6 6-6 6"/>',
@@ -562,80 +602,178 @@ var ICONS={
   down:'<path d="M6 9l6 6 6-6"/>',
   minus:'<path d="M5 12h14"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
-  dumbbell:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
-  log:'<path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/>',
-  trend:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
-  list:'<path d="M9 6h12M9 12h12M9 18h12M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/>',
-  backup:'<path d="M7 18a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 9a4.5 4.5 0 0 1 .5 9M12 11v8M9 16l3 3 3-3"/>'
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',
+  clock:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
+  dumbbell:'<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
+  log:'<rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/>',
+  trend:'<path d="M4 17l5-5 4 4 7-7M15 9h5v5"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+  sliders:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>'
 };
 function ic(n,c){return '<svg class="ico'+(c?' '+c:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+ICONS[n]+'</svg>';}
 // Rest-timer ring (display only): arc shows the share of the rest time still left.
-var RING_R=54,RING_C=Math.round(2*Math.PI*RING_R*100)/100;
+var RING_R=112,RING_C=Math.round(2*Math.PI*RING_R*100)/100;
 function ringOff(s){
   var left=s.tEnd?s.tEnd-Date.now():s.tPause||0,tot=(s.tTotal||0)*1000;
   var f=tot>0?Math.max(0,Math.min(1,left/tot)):0;
   return (RING_C*(1-f)).toFixed(2);
 }
 
+/* ---------- small data helpers for the views ---------- */
+var MSHORT=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
+function dayStart(ts){var d=new Date(ts);return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();}
+function weekStart(ts){var d=new Date(dayStart(ts));return new Date(d.getFullYear(),d.getMonth(),d.getDate()-d.getDay()).getTime();} // Sunday
+function daysAgo(ts){return Math.round((dayStart(Date.now())-dayStart(ts))/864e5);}
+function agoText(ts){
+  var n=daysAgo(ts);
+  return n<=0?'היום':n===1?'אתמול':'לפני '+n+' ימים';
+}
+function lastDone(wname){
+  var t=0;S.log.forEach(function(r){if(r.workout===wname&&r.ts>t)t=r.ts;});return t;
+}
+// The workout after the most recently logged one, in plan order.
+function nextWorkout(){
+  var t=0,wi=-1;
+  S.log.forEach(function(r){
+    if(r.ts>t){var k=S.plan.findIndex(function(w){return w.name===r.workout;});if(k>=0){t=r.ts;wi=k;}}
+  });
+  return wi<0?0:(wi+1)%S.plan.length;
+}
+// Best weight per exercise in the log, optionally only before a time.
+function bestBefore(name,before){
+  var b=null;
+  S.log.forEach(function(r){
+    if(before!=null&&r.ts>=before)return;
+    r.items.forEach(function(it){if(exKey(it.name)===name&&(b===null||it.weight>b))b=it.weight;});
+  });
+  return b;
+}
+// Number of exercises in a log record that beat every earlier weight for that exercise.
+function recordPRs(r){
+  var n=0;
+  r.items.forEach(function(it){var b=bestBefore(exKey(it.name),r.ts);if(b!==null&&it.weight>b)n++;});
+  return n;
+}
+function sw(on,actOn,actOff,label){
+  return '<button class="sw'+(on?' on':'')+'" role="switch" aria-checked="'+(on?'true':'false')+'" aria-label="'+label+'" data-act="'+(on?actOff:actOn)+'"><i></i></button>';
+}
+
+/* ---------- views ---------- */
+function viewHome(){
+  var d=new Date(),h='<div><div class="dim small">'+esc(d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'}))+'</div><h1>אימון</h1></div>';
+  if(!storageOK)h+='<div class="warnbox">אחסון הדפדפן לא זמין — הנתונים לא יישמרו.</div>';
+  if(S.session){
+    var s=S.session,w=S.plan[s.w],sub='תרגיל '+(s.i+1)+' מתוך '+w.exercises.length;
+    if(s.tEnd&&s.tEnd>Date.now())sub+=' · מנוחה';else if(s.tPause)sub+=' · מנוחה מושהית';
+    h+='<div class="cur"><div class="grow"><div class="small acc" style="font-weight:700">אימון בתהליך</div>'+
+      '<div style="font-size:20px;font-weight:800">'+esc(w.name)+'</div><div class="dim small">'+sub+'</div></div>'+
+      '<button class="pri" data-act="resume" style="flex:none">המשך</button></div>';
+  }
+  if(total()===0){
+    h+='<div class="card"><h2>התחלה</h2><p class="dim" style="margin:6px 0 12px">התוכנית ריקה. הוסף תרגילים לאימונים.</p>'+
+      '<button class="pri big" data-act="goplan">הוסף תרגיל</button></div>';
+  }
+  h+='<div class="sec">התוכנית שלך</div><div class="grid2">';
+  var nx=S.session?-1:nextWorkout();
+  S.plan.forEach(function(w,i){
+    var t=lastDone(w.name);
+    h+='<div class="wcard"><div><div class="nm">'+esc(w.name)+'</div><div class="dim small">'+w.exercises.length+' תרגילים</div></div>'+
+      '<div class="row between"><div class="small dim2">'+(t?agoText(t):'עוד לא בוצע')+'</div>'+
+      '<button class="ib r'+(i===nx?' pri':'')+'" aria-label="התחל '+esc(w.name)+'" data-act="start" data-i="'+i+'">'+ic('play','fill')+'</button></div></div>';
+  });
+  h+='</div>';
+  var ws=weekStart(Date.now()),cnt=S.log.filter(function(r){return r.ts>=ws;}).length,goal=S.plan.length,pills='';
+  for(var k=0;k<Math.max(goal,cnt);k++)pills+='<i class="'+(k<cnt?'on':'')+'"></i>';
+  h+='<div class="card row between"><div><div class="dim small">השבוע</div><div style="font-size:18px;font-weight:700">'+cnt+' מתוך '+goal+' אימונים</div></div>'+
+    '<div class="pills w">'+pills+'</div></div>';
+  return h;
+}
+
 function viewWorkout(){
   var s=S.session,w=S.plan[s.w],n=w.exercises.length;
   if(!n)return '<p>אין תרגילים.</p>';
   var ex=w.exercises[s.i],done=s.done[ex.id]||0,complete=done>=ex.sets;
-  var running=!!s.tEnd,paused=!!s.tPause;
-  var h='<div class="row between"><div class="small dim">תרגיל '+(s.i+1)+' מתוך '+n+'</div>'+
-    '<button class="bt-ico dng" data-act="exit" aria-label="יציאה">'+ic('close')+'</button></div>'+
-    '<div class="prog"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
-    '<div class="wname">'+esc(ex.name)+'</div>'+
-    '<div class="wgt">'+fmtW(ex.weight)+' ק״ג'+(repsText(ex)?' <span class="reps">· '+repsText(ex)+'</span>':'')+'</div>'+
-    '<div class="card"><div class="row between"><div class="setc">'+
-      (complete?'הושלמו '+ex.sets+' מתוך '+ex.sets+' '+ic('check'):'סט '+(done+1)+' מתוך '+ex.sets)+'</div>'+
-      '<div class="row"><button class="bt-ico" data-act="setdn" aria-label="הפחת סט">'+ic('minus')+'</button>'+
-      '<button class="bt-ico" data-act="setup" aria-label="הוסף סט">'+ic('plus')+'</button></div></div></div>'+
-    '<div class="card"><div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="'+RING_R+'"/>'+
-      '<circle class="ra" id="rarc" cx="60" cy="60" r="'+RING_R+'" stroke-dasharray="'+RING_C+'" stroke-dashoffset="'+ringOff(s)+'"/></svg>'+
-      '<div class="timer '+(running||paused?'run':'idle')+'" id="timer">'+
-      fmtT(running?(s.tEnd-Date.now())/1000:paused?s.tPause/1000:ex.rest)+'</div></div>'+
-      '<div class="small dim" style="text-align:center;margin-bottom:12px">מנוחה '+ex.rest+' שנ׳</div>';
+  var running=!!s.tEnd,paused=!!s.tPause,last=s.i===n-1;
+  var pills='';for(var k=0;k<ex.sets;k++)pills+='<i class="'+(k<done?'on':'')+'"></i>';
+  var h='<div class="wk"><div class="wtop">'+
+      '<button class="ib r" data-act="exit" aria-label="יציאה מהאימון" style="color:var(--dim);background:var(--card)">'+ic('close')+'</button>'+
+      '<div class="t">'+esc(w.name)+' · תרגיל '+(s.i+1)+' מתוך '+n+'</div><div style="width:48px;flex:none"></div></div>'+
+    '<div class="bar"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
+    '<div><h1 class="wname">'+esc(ex.name)+'</h1><div class="wmeta"><div class="wgt">'+fmtW(ex.weight)+' <small>ק״ג</small></div>'+
+      (repsText(ex)?'<div class="dim">'+repsText(ex)+'</div>':'')+'</div></div>'+
+    '<div class="ring"><svg viewBox="0 0 248 248" aria-hidden="true"><circle class="rt" cx="124" cy="124" r="'+RING_R+'"/>';
   if(running||paused){
-    h+='<div class="row"><button class="bt bt-sec grow" data-act="tpause">'+(paused?'המשך':'עצור')+'</button>'+
-       '<button class="bt bt-sec grow" data-act="tskip">דלג על טיימר</button></div>';
+    h+='<circle class="ra" id="rarc" cx="124" cy="124" r="'+RING_R+'" transform="rotate(-90 124 124)" stroke-dasharray="'+RING_C+'" stroke-dashoffset="'+ringOff(s)+'"/></svg>'+
+      '<div class="in"><div class="lb">'+(paused?'מנוחה מושהית':'מנוחה')+'</div>'+
+      '<div class="tm" id="timer">'+fmtT(running?(s.tEnd-Date.now())/1000:s.tPause/1000)+'</div><div class="sb">מתוך '+fmtT(s.tTotal||ex.rest)+'</div></div>';
+  }else if(complete){
+    h+='</svg><div class="in"><div class="ok">'+ic('check')+'</div><div style="font-size:22px;font-weight:800">התרגיל הושלם</div>'+
+      '<div class="sb">'+(last?'זה היה התרגיל האחרון':'עובר לתרגיל הבא')+'</div></div>';
+  }else{
+    h+='</svg><div class="in"><div class="lb">הסט הבא</div><div class="tm">'+(done+1)+'</div>'+
+      '<div class="sb">'+(ex.rest>0?'מנוחה אחריו '+fmtT(ex.rest):'בלי מנוחה')+'</div></div>';
   }
   h+='</div>'+
-    '<button class="bt bt-pri pri" data-act="setdone" '+(complete?'disabled':'')+'>סיימתי סט</button>'+
-    '<button class="bt bt-main '+(complete?'pri':'')+'" data-act="next" style="width:100%;margin-top:12px">'+
-      (s.i===n-1?'סיים אימון':'הבא')+'</button>'+
-    '<div class="row" style="margin-top:32px"><button class="bt bt-sec grow" data-act="prev" '+(s.i===0?'disabled':'')+'>הקודם</button>'+
-      '<button class="bt bt-sec grow" data-act="skipex">דלג על תרגיל</button>'+
-      '<button class="bt bt-sec grow" data-act="finish">סיום אימון</button></div>';
+    '<div class="setbox"><button class="ib" data-act="setdn" aria-label="הפחת סט" '+(done===0?'disabled':'')+'>'+ic('minus')+'</button>'+
+      '<div class="c"><b>'+done+' <span>/ '+ex.sets+' סטים</span></b><div class="pills">'+pills+'</div></div>'+
+      '<button class="ib" data-act="setup" aria-label="הוסף סט" '+(complete?'disabled':'')+'>'+ic('plus')+'</button></div>';
+  if(running||paused){
+    h+='<div class="grid2"><button data-act="tpause">'+(paused?'המשך טיימר':'עצור טיימר')+'</button>'+
+      '<button data-act="tskip">דלג על המנוחה</button></div>';
+  }
+  h+='<div class="wbottom">'+
+    (complete?'<button class="pri big" data-act="next">'+(last?'סיים אימון':'לתרגיל הבא')+'</button>'
+             :'<button class="pri big" data-act="setdone">סיימתי סט</button>')+
+    '<div class="row"><button class="soft grow" data-act="prev" '+(s.i===0?'disabled':'')+'>הקודם</button>'+
+      '<button class="soft grow" data-act="skipex">דלג על תרגיל</button>'+
+      '<button class="soft grow" data-act="next" '+(last?'disabled':'')+'>הבא</button></div>'+
+    '<button class="lnk" data-act="finish">סיום אימון</button></div></div>';
   return h;
 }
 
 function viewSummary(){
-  var sm=ui.summary,h='<h1>סיכום אימון</h1><p class="dim">'+esc(sm.workout)+'</p>';
+  var sm=ui.summary,mins=Math.max(1,Math.round((Date.now()-(sm.start||Date.now()))/60000));
+  var h='<div><div class="small acc" style="font-weight:700">האימון הושלם</div><h1>'+esc(sm.workout)+'</h1>'+
+    '<div class="dim small">'+esc(new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'}))+' · '+(mins===1?'דקה':mins+' דקות')+'</div></div>';
   if(!sm.items.length){
     h+='<div class="card"><p>לא בוצעו תרגילים באימון הזה.</p></div>'+
       '<button class="big" data-act="discard">חזרה</button>';
     return h;
   }
+  var sets=0,prs=0;
+  var isPR=sm.items.map(function(it){sets+=it.sets;var b=bestBefore(exKey(it.name));var p=b!==null&&it.weight>b;if(p)prs++;return p;});
+  h+='<div class="grid3"><div class="tile"><b>'+sm.items.length+'</b><span>תרגילים</span></div>'+
+    '<div class="tile"><b>'+sets+'</b><span>סטים</span></div>'+
+    '<div class="tile"><b class="acc">'+prs+'</b><span>שיאי משקל</span></div></div>';
   sm.items.forEach(function(it,i){
-    h+='<div class="card"><h2>'+esc(it.name)+'</h2>'+(repsText(it)?'<div class="dim small" style="margin-bottom:8px">יעד: '+repsText(it)+'</div>':'')+'<div class="row">'+
-      '<div class="field"><label>משקל (ק״ג)</label><input id="sw'+i+'" inputmode="decimal" value="'+fmtW(it.weight)+'"></div>'+
-      '<div class="field"><label>סטים</label><input id="ss'+i+'" inputmode="numeric" value="'+it.sets+'"></div></div></div>';
+    h+='<div class="card"><div class="row between"><h2>'+esc(it.name)+'</h2>'+(isPR[i]?'<span class="badge">שיא חדש ↑</span>':'')+'</div>'+
+      (repsText(it)?'<div class="dim small" style="margin-top:2px">יעד: '+repsText(it)+'</div>':'')+'<div class="row" style="margin-top:10px">'+
+      '<div class="field"><label for="sw'+i+'">משקל (ק״ג)</label><input id="sw'+i+'" inputmode="decimal" value="'+fmtW(it.weight)+'"></div>'+
+      '<div class="field"><label for="ss'+i+'">סטים</label><input id="ss'+i+'" inputmode="numeric" value="'+it.sets+'"></div></div></div>';
   });
   h+='<label class="chk"><input type="checkbox" id="upd" checked> עדכן את משקל העבודה בתוכנית</label>'+
-    '<button class="pri big" data-act="savew" style="margin-top:8px">שמור אימון</button>'+
-    '<button class="big" data-act="back2w" style="margin-top:12px">חזרה לאימון</button>';
+    '<button class="pri big" data-act="savew">שמור אימון</button>'+
+    '<button class="full" data-act="back2w">חזרה לאימון</button>';
   return h;
 }
 
 function viewLog(){
   var h='<h1>יומן</h1>';
-  if(!S.log.length)return h+'<div class="card dim">עדיין אין אימונים ביומן.</div>';
+  if(!S.log.length)return h+'<div class="card dim">עדיין אין אימונים ביומן. אחרי שתשמור אימון הוא יופיע כאן.</div>';
   var idx=S.log.map(function(_,i){return i;}).sort(function(a,b){return S.log[b].ts-S.log[a].ts;});
+  var thisW=weekStart(Date.now()),curGroup=null;
   idx.forEach(function(i){
-    var r=S.log[i];
-    h+='<div class="card item" data-act="logopen" data-i="'+i+'"><h2>'+esc(r.workout)+'</h2>'+
-      '<div class="dim small">'+esc(fmtDate(r.ts))+'</div><div class="dim small">'+r.items.length+' תרגילים</div></div>';
+    var r=S.log[i],ws=weekStart(r.ts),g;
+    if(ws===thisW)g='השבוע';
+    else if(ws===thisW-7*864e5||Math.round((thisW-ws)/864e5)===7)g='שבוע שעבר';
+    else g='שבוע של '+new Date(ws).toLocaleDateString('he-IL',{day:'numeric',month:'long'});
+    if(g!==curGroup){h+='<div class="sec">'+esc(g)+'</div>';curGroup=g;}
+    var d=new Date(r.ts),sets=0;r.items.forEach(function(it){sets+=it.sets;});
+    var pr=recordPRs(r);
+    h+='<button class="lcard" data-act="logopen" data-i="'+i+'"><div class="d"><b>'+d.getDate()+'</b><span>'+MSHORT[d.getMonth()]+'</span></div>'+
+      '<div class="grow" style="text-align:right"><div style="font-size:18px;font-weight:700">'+esc(r.workout)+'</div>'+
+      '<div class="dim small">'+r.items.length+' תרגילים · '+sets+' סטים</div></div>'+
+      (pr?'<span class="badge">'+(pr===1?'שיא 1':pr+' שיאים')+'</span>':'')+'</button>';
   });
   return h;
 }
@@ -643,86 +781,84 @@ function viewLog(){
 function viewLogDetail(){
   var r=S.log[ui.logIdx];
   if(!r)return viewLog();
-  var h='<div class="row"><button class="sq" data-act="logback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+esc(r.workout)+'</h1></div>'+
-    '<p class="dim" style="margin-top:12px">'+esc(fmtDate(r.ts))+'</p>';
+  var h='<div class="row"><button class="ib s" data-act="logback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+esc(r.workout)+'</h1></div>'+
+    '<p class="dim">'+esc(fmtDate(r.ts))+'</p>';
   r.items.forEach(function(it,i){
-    h+='<div class="card"><h2>'+esc(it.name)+'</h2>'+(repsText(it)?'<div class="dim small" style="margin-bottom:8px">יעד: '+repsText(it)+'</div>':'')+'<div class="row">'+
-      '<div class="field"><label>משקל (ק״ג)</label><input id="lw'+i+'" inputmode="decimal" value="'+fmtW(it.weight)+'"></div>'+
-      '<div class="field"><label>סטים</label><input id="ls'+i+'" inputmode="numeric" value="'+it.sets+'"></div></div></div>';
+    h+='<div class="card"><h2>'+esc(it.name)+'</h2>'+(repsText(it)?'<div class="dim small" style="margin-top:2px">יעד: '+repsText(it)+'</div>':'')+'<div class="row" style="margin-top:10px">'+
+      '<div class="field"><label for="lw'+i+'">משקל (ק״ג)</label><input id="lw'+i+'" inputmode="decimal" value="'+fmtW(it.weight)+'"></div>'+
+      '<div class="field"><label for="ls'+i+'">סטים</label><input id="ls'+i+'" inputmode="numeric" value="'+it.sets+'"></div></div></div>';
   });
   h+='<button class="pri big" data-act="logsave">שמור שינויים</button>'+
-    '<button class="dng big" data-act="logdel" style="margin-top:12px">מחק רשומה</button>';
+    '<button class="dng full" data-act="logdel">מחק רשומה</button>';
   return h;
 }
 
-function viewPlan(){
-  var h='<h1>תוכנית</h1>';
-  S.plan.forEach(function(w,i){
-    h+='<div class="card item" data-act="editw" data-i="'+i+'"><div class="row between"><h2 style="margin:0">'+esc(w.name)+'</h2>'+
-      '<span class="tag">'+w.exercises.length+' תרגילים</span></div></div>';
-  });
-  return h;
-}
-
-function viewEdit(){
-  var w=S.plan[ui.wi],ed=null;
-  w.exercises.forEach(function(e){if(e.id===ui.editId)ed=e;});
-  var h='<div class="row"><button class="sq" data-act="goplan" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+esc(w.name)+'</h1></div>';
-  h+='<div class="card" style="margin-top:16px"><h2>'+(ed?'עריכת תרגיל':'הוסף תרגיל')+'</h2>'+
-    '<label for="fn">שם התרגיל</label><input id="fn" value="'+esc(ed?ed.name:'')+'" style="margin-bottom:12px">'+
-    '<div class="row"><div class="field"><label for="fw">משקל (ק״ג)</label><input id="fw" inputmode="decimal" value="'+(ed?fmtW(ed.weight):'')+'"></div>'+
-    '<div class="field"><label for="fs">סטים</label><input id="fs" inputmode="numeric" value="'+(ed?ed.sets:3)+'"></div>'+
-    '<div class="field"><label for="fr">מנוחה (שנ׳)</label><input id="fr" inputmode="numeric" value="'+(ed?ed.rest:90)+'"></div></div>'+
-    '<div class="row" style="margin-top:12px"><div class="field"><label for="fmin">חזרות מינימום</label><input id="fmin" inputmode="numeric" value="'+(ed&&ed.repMin?ed.repMin:'')+'"></div>'+
-    '<div class="field"><label for="fmax">חזרות מקסימום</label><input id="fmax" inputmode="numeric" value="'+(ed&&ed.repMax?ed.repMax:'')+'"></div></div>'+
+// Plan and exercise editing share one screen: a tab per workout, cards that open into an inline form.
+function exForm(ed){
+  return '<div class="form"><div><label for="fn">שם התרגיל</label><input id="fn" value="'+esc(ed?ed.name:'')+'"></div>'+
+    '<div class="grid3"><div><label for="fw">משקל (ק״ג)</label><input id="fw" inputmode="decimal" value="'+(ed?fmtW(ed.weight):'')+'"></div>'+
+    '<div><label for="fs">סטים</label><input id="fs" inputmode="numeric" value="'+(ed?ed.sets:3)+'"></div>'+
+    '<div><label for="fr">מנוחה (שנ׳)</label><input id="fr" inputmode="numeric" value="'+(ed?ed.rest:90)+'"></div></div>'+
+    '<div class="grid2"><div><label for="fmin">חזרות מינ׳</label><input id="fmin" inputmode="numeric" value="'+(ed&&ed.repMin?ed.repMin:'')+'"></div>'+
+    '<div><label for="fmax">חזרות מקס׳</label><input id="fmax" inputmode="numeric" value="'+(ed&&ed.repMax?ed.repMax:'')+'"></div></div>'+
     '<div id="ferr" class="err" hidden></div>'+
-    '<button class="pri big" data-act="saveex" style="margin-top:12px">'+(ed?'שמור':'הוסף')+'</button>'+
-    (ed?'<button class="big" data-act="canceledit" style="margin-top:12px">ביטול</button>':'')+'</div>';
+    '<div class="row"><button class="pri" data-act="saveex" style="flex:2">'+(ed?'שמור':'הוסף')+'</button>'+
+    (ed?'<button class="dng grow" data-act="exdel" data-id="'+ed.id+'">מחק</button>':'')+
+    ((ed||S.plan[ui.wi].exercises.length)?'<button class="grow" data-act="canceledit">ביטול</button>':'')+'</div></div>';
+}
+function viewEdit(){
+  var w=S.plan[ui.wi];
+  var h='<h1>תוכנית</h1><div class="seg acc">'+S.plan.map(function(p,i){
+    return '<button data-act="editw" data-i="'+i+'" class="'+(i===ui.wi?'on':'')+'">'+esc(p.name)+'</button>';
+  }).join('')+'</div>';
   w.exercises.forEach(function(e,i){
-    h+='<div class="card"><h2>'+esc(e.name)+'</h2><div class="dim small">'+fmtW(e.weight)+' ק״ג · '+e.sets+' סטים'+(repsText(e)?' · '+repsText(e):'')+' · מנוחה '+e.rest+' שנ׳</div>'+
-      '<div class="row" style="margin-top:12px"><button class="sq" data-act="exup" data-id="'+e.id+'" '+(i===0?'disabled':'')+' aria-label="למעלה">'+ic('up')+'</button>'+
-      '<button class="sq" data-act="exdn" data-id="'+e.id+'" '+(i===w.exercises.length-1?'disabled':'')+' aria-label="למטה">'+ic('down')+'</button>'+
-      '<button class="grow" data-act="exedit" data-id="'+e.id+'">עריכה</button>'+
-      '<button class="grow dng" data-act="exdel" data-id="'+e.id+'">מחיקה</button></div></div>';
+    if(e.id===ui.editId){h+=exForm(e);return;}
+    h+='<div class="excard"><div class="mv"><button data-act="exup" data-id="'+e.id+'" '+(i===0?'disabled':'')+' aria-label="הזז למעלה">'+ic('up')+'</button>'+
+      '<button data-act="exdn" data-id="'+e.id+'" '+(i===w.exercises.length-1?'disabled':'')+' aria-label="הזז למטה">'+ic('down')+'</button></div>'+
+      '<div class="grow"><div style="font-size:17px;font-weight:700">'+esc(e.name)+'</div>'+
+      '<div class="dim small">'+fmtW(e.weight)+' ק״ג · '+e.sets+' סטים'+(repsText(e)?' · '+repsText(e).replace(' חזרות',''):'')+' · מנוחה '+fmtT(e.rest)+'</div></div>'+
+      '<button class="ib s" data-act="exedit" data-id="'+e.id+'" aria-label="עריכת '+esc(e.name)+'" style="color:var(--dim)">'+ic('edit')+'</button></div>';
   });
+  if(ui.editId==='new'||!w.exercises.length)h+=exForm(null);
+  else h+='<button class="addbtn full" data-act="exnew">+ הוסף תרגיל</button>';
   return h;
 }
+function viewPlan(){return viewEdit();}
 
 function pushActive(){return pushOn();}
 function viewPush(){
-  var h='<h2 style="margin-top:16px">התראה במסך נעול</h2>';
-  if(!PUSH_URL||!VAPID_PUB)return h+'<p class="dim small" style="margin:0">טרם הוגדר שרת התראות. אחרי ההגדרה (push-worker/setup.mjs) האפשרות תופיע כאן.</p>';
-  if(!pushSupported())return h+'<p class="dim small" style="margin:0">דורש iOS 16.4 ומעלה, והאפליקציה צריכה להיות פתוחה ממסך הבית.</p>';
+  var h='<div class="lrow" style="flex-wrap:wrap"><div class="grow"><div style="font-size:16px;font-weight:700">התראה במסך נעול</div>';
+  if(!PUSH_URL||!VAPID_PUB)return h+'<div class="dim small">טרם הוגדר שרת התראות. אחרי ההגדרה (push-worker/setup.mjs) האפשרות תופיע כאן.</div></div></div>';
+  if(!pushSupported())return h+'<div class="dim small">דורש iOS 16.4 ומעלה, והאפליקציה צריכה להיות פתוחה ממסך הבית.</div></div></div>';
   var on=pushOn();
-  return h+'<div class="row">'+
-      '<div class="rng grow" style="margin:0"><button data-act="pushoff" class="'+(on?'':'on')+'">כבויה</button>'+
-      '<button data-act="pushon" class="'+(on?'on':'')+'">פעילה</button></div>'+
-      (on?'<button class="bt-sm" data-act="pushtry" style="flex:none">נסה</button>':'')+'</div>'+
-    '<p class="dim small" style="margin:10px 0 0">'+esc(ui.pushMsg||'בסוף המנוחה תגיע התראה גם כשהמסך כבוי, והמוזיקה ממשיכה. הצליל הוא צליל ההתראה הרגיל של האייפון. במצב "נעצרת" הצליל כבר עובד במסך כבוי, ולכן ההתראה משמשת רק כגיבוי.')+'</p>';
+  h+='<div class="dim small">בצליל ההתראה של האייפון</div></div><div class="row" style="flex:none">'+
+    (on?'<button class="ib s" data-act="pushtry" style="width:auto;padding:0 12px;font-size:14px">נסה</button>':'')+
+    sw(on,'pushon','pushoff','התראה במסך נעול')+'</div>'+
+    '<div class="dim small" style="flex-basis:100%">'+esc(ui.pushMsg||'בסוף המנוחה תגיע התראה גם כשהמסך כבוי, והמוזיקה ממשיכה. הצליל הוא צליל ההתראה הרגיל של האייפון. במצב "נעצרת" הצליל כבר עובד במסך כבוי, ולכן ההתראה משמשת רק כגיבוי.')+'</div></div>';
+  return h;
 }
 
 function viewBackup(){
   var snd=S.settings.endSound,cd=S.settings.countdown!==false,mx=S.settings.musicMix===true;
-  return '<h1>גיבוי</h1>'+
-    '<div class="card"><h2>צליל סיום מנוחה</h2><div class="row">'+
-      '<div class="rng grow" style="margin:0"><button data-act="sndfile" class="'+(snd==='file'?'on':'')+'">צליל חדש</button>'+
-      '<button data-act="sndbeep" class="'+(snd==='beep'?'on':'')+'">צלצול קלאסי</button></div>'+
-      '<button class="bt-sm" data-act="sndtry" style="flex:none">נסה</button></div>'+
-    '<h2 style="margin-top:16px">ספירה לאחור (5 שניות אחרונות)</h2><div class="row">'+
-      '<div class="rng grow" style="margin:0"><button data-act="cdon" class="'+(cd?'on':'')+'">פעילה</button>'+
-      '<button data-act="cdoff" class="'+(cd?'':'on')+'">כבויה</button></div>'+
-      '<button class="bt-sm" data-act="cdtry" style="flex:none">נסה</button></div>'+
-    '<h2 style="margin-top:16px">מוזיקה ברקע (Spotify)</h2><div class="row">'+
-      '<div class="rng grow" style="margin:0"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת</button>'+
-      '<button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה</button></div></div>'+
-      '<p class="dim small" style="margin:10px 0 0">'+(mx?(pushActive()?'המוזיקה ממשיכה. כשהאפליקציה פתוחה נשמע הצליל, וכשהמסך כבוי תגיע התראה.':'המוזיקה ממשיכה, אבל הצליל נשמע רק כשהאפליקציה פתוחה על המסך. כדי לקבל התראה גם כשהמסך כבוי, הפעל "התראה במסך נעול" למטה.'):'המוזיקה נעצרת בזמן המנוחה, והצליל נשמע גם כשהמסך כבוי.')+'</p>'+
-    viewPush()+'</div>'+
-    '<div class="warnbox">הנתונים שמורים רק בטלפון הזה. כדאי לגבות מדי פעם.</div>'+
-    '<div class="card"><h2>ייצוא</h2><p class="dim small">שמירת התוכנית והיומן לקובץ.</p><button class="bt-sm pri" data-act="export">ייצא גיבוי</button></div>'+
-    '<div class="card"><h2>ייבוא</h2><p class="dim small">החלפת התוכנית והיומן בקובץ גיבוי.</p>'+
-    '<button class="bt-sm" data-act="import">ייבא גיבוי</button>'+
-    '<input type="file" id="file" accept="application/json,.json" hidden></div>'+
-    '<div class="dim small" id="ver" style="text-align:center;margin:16px 0"></div>';
+  return '<h1>הגדרות</h1>'+
+    '<div class="sec">סוף המנוחה</div><div class="card list">'+
+      '<div class="lrow"><div style="font-size:16px;font-weight:700">צליל</div><div class="row" style="flex:none">'+
+        '<div class="seg in"><button data-act="sndfile" class="'+(snd==='file'?'on':'')+'">חדש</button><button data-act="sndbeep" class="'+(snd==='beep'?'on':'')+'">קלאסי</button></div>'+
+        '<button class="ib s acc" data-act="sndtry" aria-label="השמע את הצליל">'+ic('play','fill')+'</button></div></div>'+
+      '<div class="lrow"><div class="grow"><div style="font-size:16px;font-weight:700">ספירה לאחור</div><div class="dim small">ביפ בכל אחת מ-5 השניות האחרונות</div></div>'+
+        '<div class="row" style="flex:none"><button class="ib s" data-act="cdtry" style="width:auto;padding:0 12px;font-size:14px">נסה</button>'+sw(cd,'cdon','cdoff','ספירה לאחור')+'</div></div>'+
+    '</div>'+
+    '<div class="sec">כשהמסך כבוי</div><div class="card list">'+
+      '<div class="lrow" style="flex-direction:column;align-items:stretch;gap:8px"><div style="font-size:16px;font-weight:700">מוזיקה ברקע (Spotify)</div>'+
+        '<div class="seg in"><button data-act="mixoff" class="'+(mx?'':'on')+'">נעצרת · הצליל שלי</button><button data-act="mixon" class="'+(mx?'on':'')+'">ממשיכה · התראה</button></div>'+
+        '<div class="dim small">'+(mx?(pushActive()?'המוזיקה ממשיכה. כשהאפליקציה פתוחה נשמע הצליל, וכשהמסך כבוי תגיע התראה.':'המוזיקה ממשיכה, אבל הצליל נשמע רק כשהאפליקציה פתוחה על המסך. כדי לקבל התראה גם כשהמסך כבוי, הפעל "התראה במסך נעול" למטה.'):'המוזיקה נעצרת בזמן המנוחה, והצליל נשמע גם כשהמסך כבוי.')+'</div></div>'+
+      viewPush()+
+    '</div>'+
+    '<div class="sec">גיבוי</div><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="dim small">הנתונים שמורים רק בטלפון הזה. כדאי לייצא גיבוי מדי פעם.</div>'+
+      '<div class="grid2"><button class="pri" data-act="export">ייצא גיבוי</button><button data-act="import">ייבא גיבוי</button></div>'+
+      '<input type="file" id="file" accept="application/json,.json" hidden></div>'+
+    '<div class="dim2 small" id="ver" style="text-align:center"></div>';
 }
 
 /* ---------- progress ---------- */
@@ -778,7 +914,7 @@ function chartSvg(pts){
   var txt=function(x,y,t,a,c){return '<text x="'+x+'" y="'+y+'" text-anchor="'+a+'" fill="'+(c||'#8E8E96')+'" font-size="12">'+t+'</text>';};
   if(pts.length<2){
     var v=pts[0].v;
-    s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#26262B"/>'+
+    s+='<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#222228"/>'+
       '<circle cx="'+(L+pw/2)+'" cy="'+(T+ph/2)+'" r="6" fill="#FF7A1A"/>'+
       txt(L+pw/2,T+ph/2-14,fmtW(v),'middle','#F2F2F4');
     return s+'</svg>';
@@ -805,7 +941,7 @@ function chartSvg(pts){
   var yearAt=[];
   while(cur.getTime()<=end){
     var x=X(cur.getTime()),m=cur.getMonth();
-    if(i%lineStep===0)s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+(T+ph)+'" stroke="#26262B"/>';
+    if(i%lineStep===0)s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+(T+ph)+'" stroke="#222228"/>';
     if(i%step===0){
       s+=txt(x.toFixed(1),T+ph+16,MONTHS[m],'middle');
       if(crossYear&&m===0){s+=txt(x.toFixed(1),T+ph+31,cur.getFullYear(),'middle','#F2F2F4');yearAt.push(x);}
@@ -821,68 +957,77 @@ function chartSvg(pts){
   s+='<polyline fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linejoin="round" points="'+
     ser.map(function(p){return X(p.ts).toFixed(1)+','+Y(p.v).toFixed(1);}).join(' ')+'"/>';
   ser.forEach(function(p){
-    if(p.dot)s+='<circle cx="'+X(p.ts).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.5" fill="#FF7A1A" stroke="#0D0D0F" stroke-width="1.5"/>';
+    if(p.dot)s+='<circle cx="'+X(p.ts).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.5" fill="#FF7A1A" stroke="#0B0B0D" stroke-width="1.5"/>';
   });
   return s+'</svg>';
 }
 function rangeBar(){
-  return '<div class="rng">'+RANGES.map(function(r){
+  return '<div class="seg">'+RANGES.map(function(r){
     return '<button data-act="range" data-r="'+r[0]+'" class="'+(r[0]===ui.range?'on':'')+'">'+r[1]+'</button>';
   }).join('')+'</div>';
 }
-function chartBlock(pts){
+function chartBlock(pts,accentUp){
   if(!pts.length)return '<div class="card dim">אין עדיין נתונים.</div>';
-  if(pts.length<2)return '<div class="card">'+chartSvg(pts)+'<p class="dim" style="text-align:center;margin:8px 0 0">אין עדיין מספיק נתונים לגרף</p></div>';
-  return rangeBar()+'<div class="card">'+chartSvg(pts)+'</div>';
+  var lastV=pts[pts.length-1].v,d=lastV-pts[0].v;
+  var head='<div class="row between" style="align-items:flex-start"><div><div class="dim small">עכשיו</div>'+
+    '<div class="num" style="font-size:30px;font-weight:800">'+fmtW(lastV)+' <span class="small dim">ק״ג</span></div></div>'+
+    (pts.length>1?'<div class="small '+(accentUp&&d>0?'up':'dim')+'" style="margin-top:6px"><bdi dir="ltr">'+fmtDelta(d)+'</bdi> מההתחלה</div>':'')+'</div>';
+  if(pts.length<2)return '<div class="card">'+head+chartSvg(pts)+'<p class="dim small" style="text-align:center;margin-top:8px">אין עדיין מספיק נתונים לגרף</p></div>';
+  return rangeBar()+'<div class="card">'+head+chartSvg(pts)+'</div>';
 }
 
 function viewProg(){
-  var h='<h1>התקדמות</h1>',bl=S.bodyLog,lb=bl.length?bl[bl.length-1]:null;
-  h+='<div class="card item" data-act="progbody"><div class="row between"><div class="grow"><h2 style="margin-bottom:2px">משקל גוף</h2>'+
-    '<div class="dim small">'+(lb?esc(fmtDay(lb.ts)):'אין שקילות')+'</div></div>'+
-    (lb?'<div class="wgt" style="margin:0">'+fmtW(lb.kg)+' ק״ג</div>':'')+'</div></div>';
+  var h='<h1>התקדמות</h1>',bl=S.bodyLog,lb=bl.length?bl[bl.length-1]:null,pb=bl.length>1?bl[bl.length-2]:null;
   var names=exerciseNames();
+  h+='<div class="card list">';
+  h+='<button class="lrow item full" data-act="progbody" style="border-radius:0;border-width:0 0 1px;padding:12px 0;min-height:0;justify-content:space-between">'+
+    '<div style="text-align:right"><div style="font-size:16px;font-weight:700">משקל גוף</div><div class="dim small">'+(lb?esc(fmtDay(lb.ts)):'אין עדיין שקילות · הוסף')+'</div></div>'+
+    (lb?'<div class="row" style="flex:none;align-items:baseline"><span class="num" style="font-size:18px;font-weight:800">'+fmtW(lb.kg)+'</span>'+
+      (pb?'<span class="small dim" dir="ltr">'+fmtDelta(lb.kg-pb.kg)+'</span>':'')+'</div>':ic('chev'))+'</button>';
   names.forEach(function(n){
-    var lw=lastWeight(n);
-    h+='<div class="card item" data-act="progex" data-k="'+esc(n)+'"><div class="row between"><div class="grow"><h2 style="margin-bottom:2px">'+esc(n)+'</h2>'+
-      '<div class="dim small">'+esc(fmtDay(lw.ts))+'</div></div><div class="wgt" style="margin:0">'+fmtW(lw.v)+' ק״ג</div></div></div>';
+    var ups=exerciseUpdates(n),lw=ups[ups.length-1],pv=ups.length>1?ups[ups.length-2]:null,d=pv?lw.v-pv.v:0;
+    h+='<button class="lrow item full" data-act="progex" data-k="'+esc(n)+'" style="border-radius:0;border-width:0 0 1px;padding:12px 0;min-height:0;justify-content:space-between">'+
+      '<div style="text-align:right"><div style="font-size:16px;font-weight:700">'+esc(n)+'</div><div class="dim small">'+esc(fmtDay(lw.ts))+'</div></div>'+
+      '<div class="row" style="flex:none;align-items:baseline"><span class="num" style="font-size:18px;font-weight:800">'+fmtW(lw.v)+'</span>'+
+      '<span class="small '+(d>0?'up':'dim')+'" dir="ltr">'+(pv?fmtDelta(d):'ראשון')+'</span></div></button>';
   });
+  h+='</div>';
   if(!names.length)h+='<div class="card dim">תרגילים יופיעו כאן אחרי שתשמור אימון ביומן.</div>';
   return h;
 }
 
 function viewProgDetail(){
-  var h='<div class="row"><button class="bt-ico s" data-act="progback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+
-    (ui.pkind==='body'?'משקל גוף':esc(ui.pk))+'</h1></div><div style="height:16px"></div>';
+  var h='<div class="row"><button class="ib s" data-act="progback" aria-label="חזרה">'+ic('chev')+'</button><h1 style="margin:0">'+
+    (ui.pkind==='body'?'משקל גוף':esc(ui.pk))+'</h1></div>';
   if(ui.pkind==='body'){
     var bl=S.bodyLog,ed=ui.bodyEdit!=null?bl[ui.bodyEdit]:null;
-    h+='<div class="card"><h2>'+(ed?'עריכת שקילה':'הוסף שקילה')+'</h2><div class="row bwf">'+
+    h+='<div class="card"><h2>'+(ed?'עריכת שקילה':'הוסף שקילה')+'</h2><div class="row bwf" style="margin-top:10px">'+
       '<div class="field"><label for="bw">משקל (ק״ג)</label><input id="bw" inputmode="decimal" value="'+(ed?fmtW(ed.kg):'')+'"></div>'+
       '<div class="field" style="flex:1.7"><label for="bd">תאריך</label><input id="bd" type="date" max="'+ymd(Date.now())+'" value="'+ymd(ed?ed.ts:Date.now())+'"></div>'+
-      '<button class="bt-sm pri" data-act="bodysave" style="flex:none;align-self:flex-end">'+(ed?'שמור':'הוסף')+'</button></div>'+
-      '<div id="berr" class="err" hidden></div>'+
-      (ed?'<button class="bt-sm" data-act="bodycancel" style="margin-top:12px">ביטול</button>':'')+'</div>';
+      '<button class="pri" data-act="bodysave" style="flex:none">'+(ed?'שמור':'הוסף')+'</button></div>'+
+      '<div id="berr" class="err" hidden style="margin-top:10px"></div>'+
+      (ed?'<button data-act="bodycancel" style="margin-top:10px">ביטול</button>':'')+'</div>';
     var pts=bl.map(function(r){return {ts:r.ts,v:r.kg};});
-    h+=chartBlock(pts);
+    h+=chartBlock(pts,false);
     if(pts.length){
       var idx=pts.map(function(_,i){return i;}).reverse();
       var shown=ui.bodyAll?idx:idx.slice(0,5);
       h+='<div class="card"><h2>'+(ui.bodyAll?'כל השקילות':'5 שקילות אחרונות')+'</h2>';
       shown.forEach(function(i){
         var dl=i===0?'התחלה':fmtDelta(pts[i].v-pts[i-1].v);
-        h+='<div style="border-bottom:1px solid #26262B;padding-bottom:12px;margin-bottom:12px"><div class="trow" style="border:0;padding-bottom:8px"><div class="c1">'+esc(fmtDay(pts[i].ts))+'</div>'+
-          '<div class="c2">'+fmtW(pts[i].v)+'</div><div class="c3 '+(dl[0]==='+'?'up':dl[0]==='-'?'dn':'')+'">'+dl+'</div></div>'+
-          '<div class="row"><button class="bt-sm grow" data-act="bodyedit" data-i="'+i+'">עריכה</button>'+
-          '<button class="bt-sm grow dng" data-act="bodydel" data-i="'+i+'">מחיקה</button></div></div>';
+        h+='<div style="border-bottom:1px solid var(--line);padding:4px 0 12px;margin-bottom:4px"><div class="trow" style="border:0;padding-bottom:8px"><div class="c1">'+esc(fmtDay(pts[i].ts))+'</div>'+
+          '<div class="c2">'+fmtW(pts[i].v)+'</div><div class="c3">'+dl+'</div></div>'+
+          '<div class="row"><button class="grow" data-act="bodyedit" data-i="'+i+'" style="min-height:44px">עריכה</button>'+
+          '<button class="grow dng" data-act="bodydel" data-i="'+i+'" style="min-height:44px">מחיקה</button></div></div>';
       });
-      if(!ui.bodyAll&&pts.length>5)h+='<button class="bt-sm" data-act="bodyall">הצג הכל ('+pts.length+')</button>';
-      else if(ui.bodyAll&&pts.length>5)h+='<button class="bt-sm" data-act="bodyall">הצג 5 אחרונות</button>';
+      if(!ui.bodyAll&&pts.length>5)h+='<button class="full" data-act="bodyall" style="margin-top:8px">הצג הכל ('+pts.length+')</button>';
+      else if(ui.bodyAll&&pts.length>5)h+='<button class="full" data-act="bodyall" style="margin-top:8px">הצג 5 אחרונות</button>';
       h+='</div>';
     }
     return h;
   }
   var ups=exerciseUpdates(ui.pk);
-  h+=chartBlock(ups);
+  h+=chartBlock(ups,true);
   if(ups.length){
     h+='<div class="card"><h2>5 עדכוני משקל אחרונים</h2>';
     ups.map(function(_,i){return i;}).reverse().slice(0,5).forEach(function(i){
@@ -893,6 +1038,20 @@ function viewProgDetail(){
     h+='</div>';
   }
   return h;
+}
+
+function viewAlarm(){
+  var s=S.session,top='',ex=null,line='',wl='';
+  try{
+    var w=S.plan[s.w];ex=w.exercises[s.i];
+    var d=s.done[ex.id]||0;
+    top=esc(w.name)+' · תרגיל '+(s.i+1)+' מתוך '+w.exercises.length;
+    line=esc(ex.name)+' · '+(d<ex.sets?'סט '+(d+1)+' מתוך '+ex.sets:'כל הסטים הושלמו');
+    wl='<div class="w">'+fmtW(ex.weight)+' <small>ק״ג</small>'+(repsText(ex)?' · '+repsText(ex):'')+'</div>';
+  }catch(e){}
+  return '<div class="ov" role="alertdialog" aria-label="המנוחה נגמרה"><div class="t">'+top+'</div>'+
+    '<div class="mid">'+ic('clock')+'<h2>המנוחה נגמרה</h2>'+(line?'<div class="ex">'+line+'</div>':'')+wl+'</div>'+
+    '<button data-act="alarmoff">יאללה, לסט הבא</button></div>';
 }
 
 /* ---------- render ---------- */
@@ -913,11 +1072,14 @@ function render(keep){
   app.className=focus?'noNav':'';
   nav.style.display=focus?'none':'flex';
   var tab={home:'home',log:'log',logd:'log',prog:'prog',progd:'prog',plan:'plan',edit:'plan',backup:'backup'}[sc];
-  var tabs=[['home','אימון','dumbbell'],['log','יומן','log'],['prog','התקדמות','trend'],['plan','תוכנית','list'],['backup','גיבוי','backup']];
+  var tabs=[['home','אימון','dumbbell'],['log','יומן','log'],['prog','התקדמות','trend'],['plan','תוכנית','list'],['backup','הגדרות','sliders']];
   nav.innerHTML=tabs.map(function(t){
     return '<button data-act="nav" data-s="'+t[0]+'" class="'+(t[0]===tab?'on':'')+'">'+ic(t[2])+'<span>'+t[1]+'</span></button>';
   }).join('');
-  $('ov').innerHTML=ui.alarm?'<div class="ov"><div>המנוחה נגמרה!</div><button data-act="alarmoff">המשך</button></div>':'';
+  // Rest-end overlay. Built only when it first appears, so later renders do not restart its flashing.
+  var ov=$('ov');
+  if(!ui.alarm)ov.innerHTML='';
+  else if(!ov.firstChild)ov.innerHTML=viewAlarm();
   if(sc==='backup')showVer();
   if(keep!==true)window.scrollTo(0,0);
 }
@@ -1070,7 +1232,7 @@ var A={
     if(!confirm('למחוק את הרשומה מהיומן?'))return;
     S.log.splice(ui.logIdx,1);save();ui.screen='log';render();
   },
-  editw:function(el){ui.wi=+el.dataset.i;ui.editId=null;ui.screen='edit';render();},
+  editw:function(el){ui.wi=+el.dataset.i;ui.editId=null;ui.screen='plan';render();},
   saveex:function(){
     var name=$('fn').value.trim();
     if(!name){$('fn').focus();return;}
@@ -1079,13 +1241,15 @@ var A={
       err.textContent='חזרות מינימום לא יכולות להיות גדולות מהמקסימום.';err.hidden=false;
       $('fmin').focus();return;
     }
-    var w=S.plan[ui.wi],data=cleanEx({id:ui.editId||uid(),name:name,weight:$('fw').value,sets:$('fs').value,rest:$('fr').value,repMin:rmin,repMax:rmax});
-    if(ui.editId){
+    var isEdit=!!ui.editId&&ui.editId!=='new';
+    var w=S.plan[ui.wi],data=cleanEx({id:isEdit?ui.editId:uid(),name:name,weight:$('fw').value,sets:$('fs').value,rest:$('fr').value,repMin:rmin,repMax:rmax});
+    if(isEdit){
       w.exercises=w.exercises.map(function(e){return e.id===ui.editId?data:e;});
     }else w.exercises.push(data);
     ui.editId=null;save();render();
   },
-  exedit:function(el){ui.editId=el.dataset.id;render();},
+  exedit:function(el){ui.editId=el.dataset.id;render(true);},
+  exnew:function(){ui.editId='new';render(true);var f=$('fn');if(f)f.focus();},
   canceledit:function(){ui.editId=null;render();},
   exdel:function(el){
     if(!confirm('למחוק את התרגיל?'))return;
