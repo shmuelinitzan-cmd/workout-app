@@ -97,6 +97,8 @@ nav button.on{color:var(--acc);font-weight:700}
 .wtop .t{font-size:15px;color:var(--dim);text-align:center}
 .bar{height:4px;background:var(--track);border-radius:2px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--acc);border-radius:2px}
+.nxt{font-size:14px;color:var(--dim);overflow-wrap:anywhere}
+.nxt b{color:var(--text);font-weight:700}
 .wname{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.5px;overflow-wrap:anywhere;margin:0}
 .wmeta{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:4px}
 .wgt{font-size:30px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums}
@@ -700,7 +702,8 @@ function viewWorkout(){
   var h='<div class="wk"><div class="wtop">'+
       '<button class="ib r" data-act="exit" aria-label="יציאה מהאימון" style="color:var(--dim);background:var(--card)">'+ic('close')+'</button>'+
       '<div class="t">'+esc(w.name)+' · תרגיל '+(s.i+1)+' מתוך '+n+'</div><div style="width:48px;flex:none"></div></div>'+
-    '<div class="bar"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="bar"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
+      '<div class="nxt">'+(last?'זה התרגיל האחרון':'הבא: <b>'+esc(w.exercises[s.i+1].name)+'</b>')+'</div></div>'+
     '<div><h1 class="wname">'+esc(ex.name)+'</h1><div class="wmeta"><div class="wgt">'+fmtW(ex.weight)+' <small>ק״ג</small></div>'+
       (repsText(ex)?'<div class="reps">'+repsText(ex).replace(' חזרות','')+' <small>חזרות</small></div>':'')+'</div></div>'+
     '<div class="ring"><svg viewBox="0 0 248 248" aria-hidden="true"><circle class="rt" cx="124" cy="124" r="'+RING_R+'"/>';
