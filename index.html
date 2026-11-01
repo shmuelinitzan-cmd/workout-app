@@ -101,6 +101,8 @@ nav button.on{color:var(--acc);font-weight:700}
 .wmeta{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:4px}
 .wgt{font-size:30px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums}
 .wgt small{font-size:17px;font-weight:500}
+.reps{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.reps small{font-size:17px;font-weight:500;color:var(--dim)}
 .ring{position:relative;width:min(248px,72vw);aspect-ratio:1;margin:0 auto}
 .ring>svg{position:absolute;inset:0;width:100%;height:100%}
 .ring .rt{fill:none;stroke:var(--track);stroke-width:10}
@@ -700,7 +702,7 @@ function viewWorkout(){
       '<div class="t">'+esc(w.name)+' · תרגיל '+(s.i+1)+' מתוך '+n+'</div><div style="width:48px;flex:none"></div></div>'+
     '<div class="bar"><i style="width:'+Math.round((s.i+1)/n*100)+'%"></i></div>'+
     '<div><h1 class="wname">'+esc(ex.name)+'</h1><div class="wmeta"><div class="wgt">'+fmtW(ex.weight)+' <small>ק״ג</small></div>'+
-      (repsText(ex)?'<div class="dim">'+repsText(ex)+'</div>':'')+'</div></div>'+
+      (repsText(ex)?'<div class="reps">'+repsText(ex).replace(' חזרות','')+' <small>חזרות</small></div>':'')+'</div></div>'+
     '<div class="ring"><svg viewBox="0 0 248 248" aria-hidden="true"><circle class="rt" cx="124" cy="124" r="'+RING_R+'"/>';
   if(running||paused){
     h+='<circle class="ra" id="rarc" cx="124" cy="124" r="'+RING_R+'" transform="rotate(-90 124 124)" stroke-dasharray="'+RING_C+'" stroke-dashoffset="'+ringOff(s)+'"/></svg>'+
